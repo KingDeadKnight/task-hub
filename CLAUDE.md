@@ -25,7 +25,17 @@ dotnet test
 dotnet run --project src/TaskHub.Api  # API sur :5180
 cd web && npm run dev                 # front sur :5173
 cd web && npm run build && npm test && npm run lint
+dotnet tool restore                   # dotnet-ef (manifeste local)
+dotnet ef migrations add <Nom> --project src/TaskHub.Infrastructure --startup-project src/TaskHub.Api --output-dir Persistence/Migrations
 ```
+
+## Persistance et synchro
+
+- SQLite via EF Core (`ConnectionStrings:TaskHub`, chemin relatif à la racine de contenu : `src/TaskHub.Api/taskhub.db` en dev, ignoré par git). Migrations appliquées au démarrage.
+- Les `DateTimeOffset` sont stockés en millisecondes Unix (SQLite ne sait ni comparer ni trier des `DateTimeOffset`).
+- `SyncRunner` (singleton) synchronise toutes les `ITaskSource` en parallèle, un `DbContext` par source, erreurs isolées et tracées dans `SyncRuns`. Les exécutions ne se chevauchent pas. `SyncService` l'appelle au démarrage puis toutes les `Sync:IntervalMinutes`.
+- Items absents de leur source : `IsActive = false` + `InactiveSince`, purgés après `Sync:InactiveRetentionDays`. Une source en échec ne désactive jamais ses items.
+- Tests : `TaskHubApiFactory` (fichier SQLite jetable, synchro désactivée, PAT vidé) pour tout test qui démarre l'API, afin de ne jamais toucher la base de dev ni le réseau.
 
 ## Configuration des sources
 

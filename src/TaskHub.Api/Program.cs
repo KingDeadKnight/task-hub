@@ -18,6 +18,8 @@ builder.Services.AddTaskHubInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
+await app.Services.InitializeTaskHubDatabaseAsync();
+
 app.UseCors(CorsPolicy);
 
 var api = app.MapGroup("/api");
@@ -28,6 +30,6 @@ if (app.Environment.IsDevelopment())
     api.MapDebugEndpoints();
 }
 
-app.Run();
+await app.RunAsync();
 
 internal sealed record HealthResponse(string Status);

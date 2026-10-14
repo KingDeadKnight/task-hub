@@ -1,11 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
+using TaskHub.Tests.TestSupport;
 
 namespace TaskHub.Tests.Api;
 
-public sealed class HealthEndpointTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public sealed class HealthEndpointTests(TaskHubApiFactory factory)
+    : IClassFixture<TaskHubApiFactory>
 {
     [Fact]
     public async Task Get_health_returns_200_with_ok_status()
