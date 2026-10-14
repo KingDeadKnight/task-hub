@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaskHub.Api.Contracts;
+using Microsoft.Extensions.Options;
 using TaskHub.Domain;
+using TaskHub.Domain.Scoring;
 using TaskHub.Infrastructure.Queries;
 
 namespace TaskHub.Api.Endpoints;
@@ -10,6 +12,7 @@ internal static class ItemsEndpoints
 {
     public const int DefaultPageSize = 50;
     public const int MaxPageSize = 200;
+    public const int MaxTodayCount = 50;
 
     public static RouteGroupBuilder MapItemsEndpoints(this RouteGroupBuilder api)
     {
@@ -19,7 +22,13 @@ internal static class ItemsEndpoints
             .WithDescription(
                 "Filtres multi-valués (répéter le paramètre) : source, project, status. " +
                 "dueBefore est inclusif. q cherche dans le titre, l'identifiant externe et le projet. " +
-                "sort : updatedAt (défaut), dueDate, priority, status, title, project, source ; préfixer par '-' pour l'ordre décroissant (défaut : -updatedAt).");
+                "sort : updatedAt (défaut), score, dueDate, priority, status, title, project, source ; préfixer par '-' pour l'ordre décroissant (défaut : -updatedAt ; '-score' met les plus urgents en tête). " +
+                "Chaque élément porte son score de priorité unifié (0–100) et les raisons de ce score.");
+
+        api.MapGet("/items/today", GetTodayAsync)
+            .WithName("GetToday")
+            .WithSummary("Les éléments ouverts à traiter en premier (score le plus élevé), hors éléments terminés.")
+            .WithDescription($"count : nombre d'éléments (défaut : Scoring:TodayCount, max {MaxTodayCount}).");
         api.MapGet("/items/facets", async (WorkItemQueryService queries, CancellationToken ct) =>
                 TypedResults.Ok(WorkItemFacetsDto.From(await queries.GetFacetsAsync(ct))))
             .WithName("GetItemFacets")
@@ -80,6 +89,25 @@ internal static class ItemsEndpoints
 
         var result = await queries.SearchAsync(filter, sort, page, pageSize, ct);
         return TypedResults.Ok(WorkItemPageDto.From(result));
+    }
+
+    private static async Task<Results<Ok<TodayDto>, ValidationProblem>> GetTodayAsync(
+        [FromQuery(Name = "count")] int? count,
+        WorkItemQueryService queries,
+        IOptions<ScoringOptions> scoring,
+        CancellationToken ct)
+    {
+        var take = count ?? scoring.Value.TodayCount;
+        if (take is < 1 or > MaxTodayCount)
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["count"] = [$"Le nombre d'éléments doit être compris entre 1 et {MaxTodayCount}."],
+            });
+        }
+
+        var items = await queries.GetTodayAsync(take, ct);
+        return TypedResults.Ok(new TodayDto(queries.Today, items.Select(WorkItemDto.From).ToList()));
     }
 
     internal static WorkItemSort? ParseSort(string? raw)

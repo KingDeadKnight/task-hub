@@ -7,6 +7,7 @@ const SYNCING_POLL_MS = 3_000
 
 export const queryKeys = {
   items: (filters: Filters) => ['items', toItemsQuery(filters)] as const,
+  today: ['today'] as const,
   facets: ['facets'] as const,
   sources: ['sources'] as const,
 }
@@ -18,6 +19,14 @@ export function useItems(filters: Filters) {
     refetchInterval: REFRESH_INTERVAL_MS,
     // Keep showing the current list while a new filter combination loads.
     placeholderData: keepPreviousData,
+  })
+}
+
+export function useToday() {
+  return useQuery({
+    queryKey: queryKeys.today,
+    queryFn: ({ signal }) => api.today(signal),
+    refetchInterval: REFRESH_INTERVAL_MS,
   })
 }
 

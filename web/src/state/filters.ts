@@ -3,7 +3,8 @@ import type { ItemsQuery, WorkItemStatus } from '../api/client'
 export const STATUSES: readonly WorkItemStatus[] = ['Todo', 'InProgress', 'Blocked', 'Done']
 
 export const SORT_OPTIONS = [
-  { value: 'priority', label: 'Priorité' },
+  { value: '-score', label: 'Score de priorité' },
+  { value: 'priority', label: 'Priorité native' },
   { value: 'dueDate', label: 'Échéance' },
   { value: '-updatedAt', label: 'Mise à jour récente' },
   { value: 'status', label: 'Statut' },
@@ -32,8 +33,8 @@ export const DEFAULT_FILTERS: Filters = {
   projects: [],
   statuses: [],
   q: '',
-  // Native priority until the unified score exists (phase 6).
-  sort: 'priority',
+  // Unified score, most urgent first.
+  sort: '-score',
   group: 'none',
 }
 

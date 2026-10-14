@@ -1,4 +1,5 @@
 using TaskHub.Domain;
+using TaskHub.Domain.Scoring;
 
 namespace TaskHub.Infrastructure.Queries;
 
@@ -16,6 +17,7 @@ public sealed record WorkItemFilter(
 public enum WorkItemSortField
 {
     UpdatedAt,
+    Score,
     DueDate,
     Priority,
     Status,
@@ -36,6 +38,8 @@ public sealed record WorkItemFacets(
     IReadOnlyList<FacetValue<WorkItemStatus>> Statuses);
 
 public sealed record FacetValue<T>(T Value, int Count);
+
+public sealed record ScoredWorkItem(WorkItem Item, PriorityScore Score);
 
 public sealed record Page<T>(IReadOnlyList<T> Items, int PageNumber, int PageSize, int TotalCount);
 

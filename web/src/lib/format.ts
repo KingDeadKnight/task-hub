@@ -1,4 +1,4 @@
-import type { WorkItemStatus } from '../api/client'
+import type { ScoreReason, WorkItemStatus } from '../api/client'
 
 const SOURCE_LABELS: Record<string, string> = {
   azuredevops: 'Azure DevOps',
@@ -14,6 +14,34 @@ export const STATUS_LABELS: Record<WorkItemStatus, string> = {
   InProgress: 'En cours',
   Blocked: 'Bloqué',
   Done: 'Terminé',
+}
+
+const days = (n: number | null) => `${n ?? 0} j`
+
+/** Words a score reason sent by the API. */
+export function formatReason(reason: ScoreReason): string {
+  switch (reason.kind) {
+    case 'Overdue':
+      return `En retard de ${days(reason.days)}`
+    case 'DueToday':
+      return 'Échéance aujourd’hui'
+    case 'DueSoon':
+      return reason.days === 1 ? 'Échéance demain' : `Échéance dans ${days(reason.days)}`
+    case 'HighPriority':
+      return `Priorité ${reason.priority ?? 1}`
+    case 'InProgress':
+      return 'En cours'
+    case 'Blocked':
+      return 'Bloqué'
+    case 'Stale':
+      return `Sans mise à jour depuis ${days(reason.days)}`
+  }
+}
+
+export type ScoreLevel = 'high' | 'medium' | 'low'
+
+export function scoreLevel(score: number): ScoreLevel {
+  return score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low'
 }
 
 /** Today as "YYYY-MM-DD" in local time, comparable with API due dates. */

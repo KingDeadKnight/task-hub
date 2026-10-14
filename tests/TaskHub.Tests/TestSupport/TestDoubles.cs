@@ -9,6 +9,9 @@ internal sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
 
     public override DateTimeOffset GetUtcNow() => Now;
 
+    // UTC so that "today" does not depend on the machine running the tests.
+    public override TimeZoneInfo LocalTimeZone => TimeZoneInfo.Utc;
+
     public void Advance(TimeSpan delta) => Now += delta;
 }
 

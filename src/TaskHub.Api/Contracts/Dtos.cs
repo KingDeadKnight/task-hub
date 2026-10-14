@@ -1,4 +1,5 @@
 using TaskHub.Domain;
+using TaskHub.Domain.Scoring;
 using TaskHub.Infrastructure.Queries;
 using TaskHub.Infrastructure.Sync;
 
@@ -18,19 +19,29 @@ public sealed record WorkItemDto(
     int? NativePriority,
     DateOnly? DueDate,
     DateTimeOffset UpdatedAt,
-    DateTimeOffset LastSyncedAt)
+    DateTimeOffset LastSyncedAt,
+    int Score,
+    IReadOnlyList<ScoreReasonDto> ScoreReasons)
 {
-    public static WorkItemDto From(WorkItem item)
+    public static WorkItemDto From(ScoredWorkItem scored)
     {
-        ArgumentNullException.ThrowIfNull(item);
+        ArgumentNullException.ThrowIfNull(scored);
+        var item = scored.Item;
         return new(item.Id, item.Source, item.ExternalId, item.Title, item.Url, item.Project, item.Status, item.RawStatus,
-            item.NativePriority, item.DueDate, item.UpdatedAt, item.LastSyncedAt);
+            item.NativePriority, item.DueDate, item.UpdatedAt, item.LastSyncedAt,
+            scored.Score.Value,
+            scored.Score.Reasons.Select(r => new ScoreReasonDto(r.Kind, r.Days, r.Priority)).ToList());
     }
 }
 
+/// <summary>A reason for the score; the UI words it. Days is set for date reasons, Priority for HighPriority.</summary>
+public sealed record ScoreReasonDto(ScoreReasonKind Kind, int? Days, int? Priority);
+
+public sealed record TodayDto(DateOnly Date, IReadOnlyList<WorkItemDto> Items);
+
 public sealed record WorkItemPageDto(IReadOnlyList<WorkItemDto> Items, int Page, int PageSize, int TotalCount, int TotalPages)
 {
-    public static WorkItemPageDto From(Page<WorkItem> page)
+    public static WorkItemPageDto From(Page<ScoredWorkItem> page)
     {
         ArgumentNullException.ThrowIfNull(page);
         var totalPages = (int)Math.Ceiling(page.TotalCount / (double)page.PageSize);

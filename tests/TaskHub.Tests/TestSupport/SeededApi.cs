@@ -18,6 +18,7 @@ namespace TaskHub.Tests.TestSupport;
 /// beta:A-1   Mobile   Todo        -     2026-10-15  2026-10-13
 /// beta:A-2   Mobile   Todo        (inactive)
 /// </code>
+/// "Now" is 2026-10-14 09:00 UTC; scores: alpha:1 = 93, alpha:3 = 59, beta:A-1 = 48, alpha:2 = 17.
 /// </summary>
 public sealed class SeededApi : IAsyncLifetime
 {
@@ -27,6 +28,8 @@ public sealed class SeededApi : IAsyncLifetime
     {
         Factory = _root.WithWebHostBuilder(b => b.ConfigureTestServices(s =>
         {
+            // Scores depend on "now": freeze it at 2026-10-14 09:00 UTC.
+            s.AddSingleton<TimeProvider>(new FixedTimeProvider(Day(14)));
             s.RemoveAll<ITaskSource>();
             s.AddSingleton<ITaskSource>(new FakeTaskSource("alpha"));
             s.AddSingleton<ITaskSource>(new FakeTaskSource("beta"));

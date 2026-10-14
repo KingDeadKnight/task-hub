@@ -1,5 +1,25 @@
-import type { WorkItemStatus } from '../api/client'
-import { sourceLabel, STATUS_LABELS } from '../lib/format'
+import type { ScoreReason, WorkItemStatus } from '../api/client'
+import { formatReason, scoreLevel, sourceLabel, STATUS_LABELS, type ScoreLevel } from '../lib/format'
+
+const SCORE_STYLES: Record<ScoreLevel, string> = {
+  high: 'bg-red-600 text-white dark:bg-red-500',
+  medium: 'bg-amber-400 text-amber-950 dark:bg-amber-500',
+  low: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
+}
+
+/** Unified priority score (0–100); the reasons are in the tooltip and for screen readers. */
+export function ScoreBadge({ score, reasons }: { score: number; reasons: ScoreReason[] }) {
+  const explanation = reasons.length > 0 ? reasons.map(formatReason).join(', ') : 'Aucun facteur particulier'
+  return (
+    <span
+      title={`Score de priorité ${score}/100 : ${explanation}`}
+      className={`inline-flex min-w-9 shrink-0 justify-center rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${SCORE_STYLES[scoreLevel(score)]}`}
+    >
+      {score}
+      <span className="sr-only"> sur 100 : {explanation}</span>
+    </span>
+  )
+}
 
 const SOURCE_STYLES: Record<string, string> = {
   azuredevops: 'bg-sky-100 text-sky-800 ring-sky-200 dark:bg-sky-950 dark:text-sky-300 dark:ring-sky-900',

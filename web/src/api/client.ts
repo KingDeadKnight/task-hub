@@ -10,7 +10,9 @@ export type WorkItemFacets = Schemas['WorkItemFacetsDto']
 export type SourcesStatus = Schemas['SourcesStatusDto']
 export type SourceStatus = Schemas['SourceStatusDto']
 export type SyncResponse = Schemas['SyncResponseDto']
-export type ItemsQuery = NonNullable<paths['/api/items']['get']['parameters']['query']>
+export type ScoreReason = Schemas['ScoreReasonDto']
+export type Today = Schemas['TodayDto']
+export type ItemsQuery =NonNullable<paths['/api/items']['get']['parameters']['query']>
 
 export class ApiError extends Error {
   readonly status: number
@@ -39,6 +41,9 @@ function ensure<T>({ data, error, response }: ClientResult<T>): T {
 export const api = {
   items: async (query: ItemsQuery, signal?: AbortSignal): Promise<WorkItemPage> =>
     ensure(await client.GET('/api/items', { params: { query }, signal })),
+
+  today: async (signal?: AbortSignal): Promise<Today> =>
+    ensure(await client.GET('/api/items/today', { signal })),
 
   facets: async (signal?: AbortSignal): Promise<WorkItemFacets> =>
     ensure(await client.GET('/api/items/facets', { signal })),

@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using TaskHub.Domain;
+using TaskHub.Domain.Scoring;
 using TaskHub.Infrastructure.Persistence;
 using TaskHub.Infrastructure.Queries;
 using TaskHub.Infrastructure.Sources.AzureDevOps;
@@ -33,6 +35,13 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddSingleton<SyncRunner>();
         services.AddSingleton<WorkItemQueryService>();
+        services.AddOptions<ScoringOptions>()
+            .Bind(configuration.GetSection(ScoringOptions.SectionName))
+            .Validate(o => o.DueDateWeight >= 0 && o.PriorityWeight >= 0 && o.StatusWeight >= 0 && o.StalenessWeight >= 0,
+                "Scoring weights must not be negative.")
+            .Validate(o => o.TodayCount > 0, "Scoring:TodayCount must be positive.")
+            .ValidateOnStart();
+        services.AddSingleton(sp => new PriorityScorer(sp.GetRequiredService<IOptions<ScoringOptions>>().Value));
         services.AddHostedService<SyncService>();
 
         services.AddOptions<AzureDevOpsOptions>().Bind(configuration.GetSection(AzureDevOpsOptions.SectionName));

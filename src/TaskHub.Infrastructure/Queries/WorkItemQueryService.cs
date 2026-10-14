@@ -1,12 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using TaskHub.Domain;
+using TaskHub.Domain.Scoring;
 using TaskHub.Infrastructure.Persistence;
 
 namespace TaskHub.Infrastructure.Queries;
 
-public sealed class WorkItemQueryService(IDbContextFactory<TaskHubDbContext> dbFactory)
+public sealed class WorkItemQueryService(
+    IDbContextFactory<TaskHubDbContext> dbFactory,
+    PriorityScorer scorer,
+    TimeProvider timeProvider)
 {
-    public async Task<Page<WorkItem>> SearchAsync(WorkItemFilter filter, WorkItemSort sort, int pageNumber, int pageSize, CancellationToken ct)
+    public async Task<Page<ScoredWorkItem>> SearchAsync(WorkItemFilter filter, WorkItemSort sort, int pageNumber, int pageSize, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(filter);
         ArgumentNullException.ThrowIfNull(sort);
@@ -15,6 +19,19 @@ public sealed class WorkItemQueryService(IDbContextFactory<TaskHubDbContext> dbF
 
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         var query = ApplyFilter(db.WorkItems.AsNoTracking().Where(w => w.IsActive), filter);
+        var scoreItem = CreateScorer();
+
+        if (sort.Field == WorkItemSortField.Score)
+        {
+            // The score depends on "now": computed in memory. A personal task list stays small enough.
+            var all = (await query.ToListAsync(ct)).Select(e => scoreItem(e.ToDomain()));
+            var ordered = sort.Descending
+                ? all.OrderByDescending(s => s.Score.Value)
+                : all.OrderBy(s => s.Score.Value);
+            var scored = ordered.ThenBy(s => s.Item.DueDate ?? DateOnly.MaxValue).ThenBy(s => s.Item.Id, StringComparer.Ordinal).ToList();
+            var pageItems = scored.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            return new Page<ScoredWorkItem>(pageItems, pageNumber, pageSize, scored.Count);
+        }
 
         var total = await query.CountAsync(ct);
         var entities = await ApplySort(query, sort)
@@ -22,7 +39,36 @@ public sealed class WorkItemQueryService(IDbContextFactory<TaskHubDbContext> dbF
             .Take(pageSize)
             .ToListAsync(ct);
 
-        return new Page<WorkItem>(entities.Select(e => e.ToDomain()).ToList(), pageNumber, pageSize, total);
+        return new Page<ScoredWorkItem>(entities.Select(e => scoreItem(e.ToDomain())).ToList(), pageNumber, pageSize, total);
+    }
+
+    /// <summary>The <paramref name="count"/> open items (not Done) to handle first, by score.</summary>
+    public async Task<IReadOnlyList<ScoredWorkItem>> GetTodayAsync(int count, CancellationToken ct)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
+
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        var open = await db.WorkItems.AsNoTracking()
+            .Where(w => w.IsActive && w.Status != WorkItemStatus.Done)
+            .ToListAsync(ct);
+
+        var scoreItem = CreateScorer();
+        return open.Select(e => scoreItem(e.ToDomain()))
+            .OrderByDescending(s => s.Score.Value)
+            .ThenBy(s => s.Item.DueDate ?? DateOnly.MaxValue)
+            .ThenBy(s => s.Item.Id, StringComparer.Ordinal)
+            .Take(count)
+            .ToList();
+    }
+
+    /// <summary>Today in the server's local time zone: that is what "overdue" means to the user.</summary>
+    public DateOnly Today => DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
+
+    private Func<WorkItem, ScoredWorkItem> CreateScorer()
+    {
+        var now = timeProvider.GetUtcNow();
+        var today = Today;
+        return item => new ScoredWorkItem(item, scorer.Score(item, today, now));
     }
 
     public async Task<WorkItemFacets> GetFacetsAsync(CancellationToken ct)

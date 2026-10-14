@@ -1,12 +1,13 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { FACETS, ITEMS, page, SOURCES } from './test/fixtures'
+import { FACETS, ITEMS, page, SOURCES, TODAY } from './test/fixtures'
 import { callsTo, mockApi } from './test/mockApi'
 import { renderApp } from './test/renderApp'
 
 const baseRoutes = {
   'GET /api/items': page(),
+  'GET /api/items/today': TODAY,
   'GET /api/items/facets': FACETS,
   'GET /api/sources': SOURCES,
 }
@@ -27,7 +28,7 @@ describe('App', () => {
     expect(await screen.findByText('3 tâches')).toBeInTheDocument()
     expect(rowTitles()).toEqual(['Fix login bug', 'Write docs', 'Review contract'])
 
-    const link = screen.getByRole('link', { name: /Fix login bug/ })
+    const link = within(screen.getByRole('region', { name: 'Tâches' })).getByRole('link', { name: /Fix login bug/ })
     expect(link).toHaveAttribute('href', 'https://example.test/1')
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
@@ -38,13 +39,38 @@ describe('App', () => {
     expect(overdue[0]).toHaveClass('text-red-600')
   })
 
-  it('demande par défaut les tâches triées par priorité', async () => {
+  it('demande par défaut les tâches triées par score décroissant et affiche le score', async () => {
     const fetchMock = mockApi(baseRoutes)
 
     renderApp()
 
     await screen.findByText('3 tâches')
-    expect(lastItemsCall(fetchMock)?.searchParams.get('sort')).toBe('priority')
+    expect(lastItemsCall(fetchMock)?.searchParams.get('sort')).toBe('-score')
+    const list = screen.getByRole('region', { name: 'Tâches' })
+    expect(within(list).getByTitle(/Score de priorité 95\/100 : En retard de 12 j, Priorité 1, En cours/)).toHaveTextContent('95')
+  })
+
+  it('affiche les tâches à traiter en priorité avec leurs raisons', async () => {
+    mockApi(baseRoutes)
+
+    renderApp()
+
+    const panel = await screen.findByRole('region', { name: 'À traiter en priorité aujourd’hui' })
+    const rows = within(panel).getAllByRole('listitem').filter((li) => li.parentElement?.tagName === 'OL')
+    expect(rows.map((r) => within(r).getByRole('link').textContent)).toEqual(['Fix login bug', 'Review contract'])
+    expect(within(rows[0]).getByRole('list', { name: 'Raisons' })).toHaveTextContent('En retard de 12 j')
+    expect(within(rows[1]).getByText('Bloqué')).toBeInTheDocument()
+  })
+
+  it('masque le panneau prioritaire pendant un filtrage', async () => {
+    mockApi(baseRoutes)
+    const user = userEvent.setup()
+    renderApp()
+    await screen.findByRole('region', { name: 'À traiter en priorité aujourd’hui' })
+
+    await user.click(screen.getByRole('button', { name: /Bloqué/ }))
+
+    expect(screen.queryByRole('region', { name: 'À traiter en priorité aujourd’hui' })).not.toBeInTheDocument()
   })
 
   it('affiche l’état des sources, y compris les erreurs', async () => {
@@ -152,7 +178,9 @@ describe('App', () => {
 
     await user.selectOptions(screen.getByRole('combobox', { name: 'Grouper par' }), 'Projet')
 
-    const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.firstChild?.textContent)
+    const headings = within(screen.getByRole('region', { name: 'Tâches' }))
+      .getAllByRole('heading', { level: 2 })
+      .map((h) => h.firstChild?.textContent)
     expect(headings).toEqual(['Docs', 'Mobile', 'Web'])
   })
 

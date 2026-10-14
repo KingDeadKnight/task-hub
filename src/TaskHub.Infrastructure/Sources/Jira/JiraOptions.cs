@@ -6,8 +6,10 @@ public sealed class JiraOptions
 {
     public const string SectionName = "Sources:Jira";
 
-    /// <summary>Jira Cloud site, e.g. https://your-domain.atlassian.net.</summary>
-    public Uri? BaseUrl { get; set; }
+    /// <summary>Jira Cloud site, e.g. https://your-domain.atlassian.net. A string so that an empty value just means "not configured".</summary>
+    public string BaseUrl { get; set; } = "";
+
+    public Uri? SiteUri => Uri.TryCreate(BaseUrl, UriKind.Absolute, out var uri) && uri.Scheme is "https" or "http" ? uri : null;
 
     /// <summary>Atlassian account e-mail used with the API token.</summary>
     public string Email { get; set; } = "";
@@ -45,5 +47,5 @@ public sealed class JiraOptions
         };
 
     public bool IsConfigured =>
-        BaseUrl is { IsAbsoluteUri: true } && !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(ApiToken);
+        SiteUri is not null && !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(ApiToken);
 }

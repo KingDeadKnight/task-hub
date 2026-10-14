@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { item } from '../test/fixtures'
-import { formatDueDate, formatRelative, isOverdue, sourceLabel, todayIso } from './format'
+import { formatDueDate, formatReason, formatRelative, isOverdue, scoreLevel, sourceLabel, todayIso } from './format'
 import { groupItems } from './grouping'
 
 describe('groupItems', () => {
@@ -28,6 +28,23 @@ describe('groupItems', () => {
 
   it('groupe par source avec un libellé lisible', () => {
     expect(groupItems(items, 'source', sourceLabel).map((g) => g.label)).toEqual(['Azure DevOps', 'Jira'])
+  })
+})
+
+describe('score', () => {
+  it('formule chaque raison du score', () => {
+    expect(formatReason({ kind: 'Overdue', days: 3, priority: null })).toBe('En retard de 3 j')
+    expect(formatReason({ kind: 'DueToday', days: 0, priority: null })).toBe('Échéance aujourd’hui')
+    expect(formatReason({ kind: 'DueSoon', days: 1, priority: null })).toBe('Échéance demain')
+    expect(formatReason({ kind: 'DueSoon', days: 3, priority: null })).toBe('Échéance dans 3 j')
+    expect(formatReason({ kind: 'HighPriority', days: null, priority: 1 })).toBe('Priorité 1')
+    expect(formatReason({ kind: 'InProgress', days: null, priority: null })).toBe('En cours')
+    expect(formatReason({ kind: 'Blocked', days: null, priority: null })).toBe('Bloqué')
+    expect(formatReason({ kind: 'Stale', days: 20, priority: null })).toBe('Sans mise à jour depuis 20 j')
+  })
+
+  it('classe le score en trois niveaux', () => {
+    expect([95, 70, 69, 40, 39, 0].map(scoreLevel)).toEqual(['high', 'high', 'medium', 'medium', 'low', 'low'])
   })
 })
 

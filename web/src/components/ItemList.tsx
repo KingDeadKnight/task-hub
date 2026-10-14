@@ -4,7 +4,7 @@ import { useItems } from '../api/queries'
 import { formatDueDate, isOverdue, sourceLabel } from '../lib/format'
 import { groupItems } from '../lib/grouping'
 import { hasActiveFilters, type Filters } from '../state/filters'
-import { SourceBadge, StatusBadge } from './Badges'
+import { ScoreBadge, SourceBadge, StatusBadge } from './Badges'
 import { ExternalIcon } from './icons'
 
 const panel = 'rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'
@@ -26,7 +26,8 @@ function ItemRow({ item }: { item: WorkItem }) {
   return (
     // Phone: badges on top, title full width. From sm: source | title + meta | status + due date.
     <li className="grid grid-cols-[1fr_auto] items-start gap-x-3 gap-y-1.5 px-4 py-3 hover:bg-slate-50 sm:grid-cols-[auto_1fr_auto] dark:hover:bg-slate-800/50">
-      <div className="col-start-1 row-start-1 justify-self-start">
+      <div className="col-start-1 row-start-1 flex items-center gap-2 justify-self-start">
+        <ScoreBadge score={item.score} reasons={item.scoreReasons} />
         <SourceBadge source={item.source} />
       </div>
       <div className="col-span-2 row-start-2 min-w-0 sm:col-span-1 sm:col-start-2 sm:row-start-1">

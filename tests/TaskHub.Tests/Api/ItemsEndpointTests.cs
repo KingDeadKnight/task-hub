@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using TaskHub.Api.Contracts;
 using TaskHub.Domain;
+using TaskHub.Domain.Scoring;
 using TaskHub.Tests.TestSupport;
 
 namespace TaskHub.Tests.Api;
@@ -32,7 +33,56 @@ public sealed class ItemsEndpointTests(SeededApi api) : IClassFixture<SeededApi>
 
         item.Should().BeEquivalentTo(new WorkItemDto(
             "alpha:1", "alpha", "1", "Fix login bug", "https://example.test/1", "Web", WorkItemStatus.InProgress, "InProgress",
-            1, new DateOnly(2026, 10, 10), SeededApi.Day(5), SeededApi.Day(14)));
+            1, new DateOnly(2026, 10, 10), SeededApi.Day(5), SeededApi.Day(14),
+            // Overdue (40) + priority 1 (30) + in progress (20) + 9 days without update (0.3 × 10) = 93.
+            Score: 93,
+            ScoreReasons:
+            [
+                new ScoreReasonDto(ScoreReasonKind.Overdue, Days: 4, Priority: null),
+                new ScoreReasonDto(ScoreReasonKind.HighPriority, Days: null, Priority: 1),
+                new ScoreReasonDto(ScoreReasonKind.InProgress, Days: null, Priority: null),
+            ]));
+    }
+
+    [Theory]
+    [InlineData("-score", new[] { "alpha:1", "alpha:3", "beta:A-1", "alpha:2" }, new[] { 93, 59, 48, 17 })]
+    [InlineData("score", new[] { "alpha:2", "beta:A-1", "alpha:3", "alpha:1" }, new[] { 17, 48, 59, 93 })]
+    public async Task Sorts_by_unified_score(string sort, string[] expectedIds, int[] expectedScores)
+    {
+        var page = await GetAsync("?sort=" + sort);
+
+        page.Items.Select(i => i.Id).Should().Equal(expectedIds);
+        page.Items.Select(i => i.Score).Should().Equal(expectedScores);
+    }
+
+    [Fact]
+    public async Task Score_sort_paginates_and_filters()
+    {
+        var page = await GetAsync("?sort=-score&project=Web&pageSize=1&page=2");
+
+        page.Items.Select(i => i.Id).Should().Equal("alpha:3");
+        page.Should().BeEquivalentTo(new { TotalCount = 2, TotalPages = 2 });
+    }
+
+    [Fact]
+    public async Task Today_lists_top_open_items_by_score()
+    {
+        using var client = api.CreateClient();
+
+        var today = await client.GetJsonAsync<TodayDto>("/api/items/today?count=2");
+
+        today.Date.Should().Be(new DateOnly(2026, 10, 14));
+        today.Items.Select(i => (i.Id, i.Score)).Should().Equal(("alpha:1", 93), ("alpha:3", 59));
+    }
+
+    [Fact]
+    public async Task Today_defaults_to_configured_count_and_validates_it()
+    {
+        using var client = api.CreateClient();
+
+        (await client.GetJsonAsync<TodayDto>("/api/items/today")).Items.Should().HaveCount(4, "only 4 open items, below the default of 5");
+        var invalid = await client.GetAsync(new Uri("/api/items/today?count=0", UriKind.Relative), TestContext.Current.CancellationToken);
+        invalid.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Theory]

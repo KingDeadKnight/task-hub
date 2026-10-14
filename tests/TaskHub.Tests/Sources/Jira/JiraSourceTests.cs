@@ -15,7 +15,7 @@ public sealed class JiraSourceTests
 
     private static JiraOptions Configured(params string[] projects)
     {
-        var options = new JiraOptions { BaseUrl = new Uri("https://contoso.atlassian.net"), Email = Email, ApiToken = Token };
+        var options = new JiraOptions { BaseUrl = "https://contoso.atlassian.net", Email = Email, ApiToken = Token };
         foreach (var project in projects)
         {
             options.Projects.Add(project);
@@ -141,7 +141,7 @@ public sealed class JiraSourceTests
     public async Task Missing_configuration_throws_without_calling_jira()
     {
         var handler = new StubHttpMessageHandler(TwoPages);
-        var source = CreateSource(handler, new JiraOptions { BaseUrl = new Uri("https://contoso.atlassian.net"), Email = Email });
+        var source = CreateSource(handler, new JiraOptions { BaseUrl = "https://contoso.atlassian.net", Email = Email });
 
         source.IsConfigured.Should().BeFalse();
         var act = () => source.FetchAssignedToMeAsync(TestContext.Current.CancellationToken);

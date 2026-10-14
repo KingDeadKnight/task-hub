@@ -31,7 +31,7 @@
           "ItemsEndpoints"
         ],
         "summary": "Liste les éléments actifs, filtrés, triés et paginés.",
-        "description": "Filtres multi-valués (répéter le paramètre) : source, project, status. dueBefore est inclusif. q cherche dans le titre, l'identifiant externe et le projet. sort : updatedAt (défaut), dueDate, priority, status, title, project, source ; préfixer par '-' pour l'ordre décroissant (défaut : -updatedAt).",
+        "description": "Filtres multi-valués (répéter le paramètre) : source, project, status. dueBefore est inclusif. q cherche dans le titre, l'identifiant externe et le projet. sort : updatedAt (défaut), score, dueDate, priority, status, title, project, source ; préfixer par '-' pour l'ordre décroissant (défaut : -updatedAt ; '-score' met les plus urgents en tête). Chaque élément porte son score de priorité unifié (0–100) et les raisons de ce score.",
         "operationId": "GetItems",
         "parameters": [
           {
@@ -110,6 +110,48 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WorkItemPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/items/today": {
+      "get": {
+        "tags": [
+          "ItemsEndpoints"
+        ],
+        "summary": "Les éléments ouverts à traiter en premier (score le plus élevé), hors éléments terminés.",
+        "description": "count : nombre d'éléments (défaut : Scoring:TodayCount, max 50).",
+        "operationId": "GetToday",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayDto"
                 }
               }
             }
@@ -312,6 +354,44 @@
           }
         }
       },
+      "ScoreReasonDto": {
+        "required": [
+          "kind",
+          "days",
+          "priority"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/ScoreReasonKind"
+          },
+          "days": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "priority": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "ScoreReasonKind": {
+        "enum": [
+          "Overdue",
+          "DueToday",
+          "DueSoon",
+          "HighPriority",
+          "InProgress",
+          "Blocked",
+          "Stale"
+        ]
+      },
       "SourcesStatusDto": {
         "required": [
           "isSyncing",
@@ -458,6 +538,25 @@
           }
         }
       },
+      "TodayDto": {
+        "required": [
+          "date",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemDto"
+            }
+          }
+        }
+      },
       "WorkItemDto": {
         "required": [
           "id",
@@ -471,7 +570,9 @@
           "nativePriority",
           "dueDate",
           "updatedAt",
-          "lastSyncedAt"
+          "lastSyncedAt",
+          "score",
+          "scoreReasons"
         ],
         "type": "object",
         "properties": {
@@ -520,6 +621,16 @@
           "lastSyncedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scoreReasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScoreReasonDto"
+            }
           }
         }
       },

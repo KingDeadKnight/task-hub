@@ -38,6 +38,13 @@ if (!isOpenApiGeneration)
     await app.Services.InitializeTaskHubDatabaseAsync();
 }
 
+// In the Docker image, the built front end lives in wwwroot (in dev, Vite serves it instead).
+// Static files must run before routing: otherwise the SPA fallback endpoint is selected first
+// and the static file middleware skips the request (assets would be answered with index.html).
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.UseRouting();
+
 app.UseCors(CorsPolicy);
 
 app.MapOpenApi();
@@ -52,6 +59,9 @@ if (app.Environment.IsDevelopment())
 {
     api.MapDebugEndpoints();
 }
+
+// Client-side routes fall back to the SPA; unknown /api and /openapi paths stay 404.
+app.MapFallbackToFile("{*path:regex(^(?!api/|openapi/).*$)}", "index.html");
 
 await app.RunAsync();
 

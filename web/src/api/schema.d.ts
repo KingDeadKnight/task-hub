@@ -29,9 +29,29 @@ export interface paths {
         };
         /**
          * Liste les éléments actifs, filtrés, triés et paginés.
-         * @description Filtres multi-valués (répéter le paramètre) : source, project, status. dueBefore est inclusif. q cherche dans le titre, l'identifiant externe et le projet. sort : updatedAt (défaut), dueDate, priority, status, title, project, source ; préfixer par '-' pour l'ordre décroissant (défaut : -updatedAt).
+         * @description Filtres multi-valués (répéter le paramètre) : source, project, status. dueBefore est inclusif. q cherche dans le titre, l'identifiant externe et le projet. sort : updatedAt (défaut), score, dueDate, priority, status, title, project, source ; préfixer par '-' pour l'ordre décroissant (défaut : -updatedAt ; '-score' met les plus urgents en tête). Chaque élément porte son score de priorité unifié (0–100) et les raisons de ce score.
          */
         get: operations["GetItems"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/items/today": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Les éléments ouverts à traiter en premier (score le plus élevé), hors éléments terminés.
+         * @description count : nombre d'éléments (défaut : Scoring:TodayCount, max 50).
+         */
+        get: operations["GetToday"];
         put?: never;
         post?: never;
         delete?: never;
@@ -125,6 +145,15 @@ export interface components {
             detail?: null | string;
             instance?: null | string;
         };
+        ScoreReasonDto: {
+            kind: components["schemas"]["ScoreReasonKind"];
+            /** Format: int32 */
+            days: null | number;
+            /** Format: int32 */
+            priority: null | number;
+        };
+        /** @enum {unknown} */
+        ScoreReasonKind: "Overdue" | "DueToday" | "DueSoon" | "HighPriority" | "InProgress" | "Blocked" | "Stale";
         SourcesStatusDto: {
             isSyncing: boolean;
             sources: components["schemas"]["SourceStatusDto"][];
@@ -162,6 +191,11 @@ export interface components {
             itemCount: number;
             error: null | string;
         };
+        TodayDto: {
+            /** Format: date */
+            date: string;
+            items: components["schemas"]["WorkItemDto"][];
+        };
         WorkItemDto: {
             id: string;
             source: string;
@@ -179,6 +213,9 @@ export interface components {
             updatedAt: string;
             /** Format: date-time */
             lastSyncedAt: string;
+            /** Format: int32 */
+            score: number;
+            scoreReasons: components["schemas"]["ScoreReasonDto"][];
         };
         WorkItemFacetsDto: {
             sources: components["schemas"]["FacetValueDto"][];
@@ -252,6 +289,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WorkItemPageDto"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    GetToday: {
+        parameters: {
+            query?: {
+                count?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TodayDto"];
                 };
             };
             /** @description Bad Request */

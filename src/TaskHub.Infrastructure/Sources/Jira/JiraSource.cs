@@ -34,14 +34,14 @@ public sealed partial class JiraSource(
     public async Task<IReadOnlyList<WorkItem>> FetchAssignedToMeAsync(CancellationToken ct)
     {
         var settings = options.CurrentValue;
-        if (!settings.IsConfigured || settings.BaseUrl is null)
+        if (!settings.IsConfigured || settings.SiteUri is not { } site)
         {
             throw new SourceNotConfiguredException(
                 $"Jira is not configured: set {JiraOptions.SectionName}:BaseUrl, {JiraOptions.SectionName}:Email and {JiraOptions.SectionName}:ApiToken.");
         }
 
         var stopwatch = Stopwatch.StartNew();
-        var uri = new Uri(settings.BaseUrl, "/rest/api/3/search/jql");
+        var uri = new Uri(site, "/rest/api/3/search/jql");
         var jql = BuildJql(settings.Projects);
         var statusMapper = new StatusMapper(settings.StatusMappings.AsReadOnly());
         var priorities = settings.PriorityMappings.AsReadOnly();
@@ -57,7 +57,7 @@ public sealed partial class JiraSource(
             var pageSize = Math.Min(PageSize, settings.MaxItems - items.Count);
             var page = await SearchAsync(uri, new JiraSearchRequest(jql, JiraMapper.Fields, pageSize, nextPageToken), settings, ct);
             pages++;
-            items.AddRange((page?.Issues ?? []).Select(i => JiraMapper.Map(i, settings.BaseUrl, statusMapper, priorities, syncedAt)));
+            items.AddRange((page?.Issues ?? []).Select(i => JiraMapper.Map(i, site, statusMapper, priorities, syncedAt)));
 
             nextPageToken = page?.IsLast == true ? null : page?.NextPageToken;
             // Guard against a token that would loop forever.

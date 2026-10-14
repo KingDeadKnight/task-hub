@@ -68,8 +68,10 @@ describe('toItemsQuery', () => {
     })
   })
 
-  it('trie par priorité par défaut', () => {
-    expect(toItemsQuery(DEFAULT_FILTERS).sort).toBe('priority')
+  it('trie par score de priorité décroissant par défaut', () => {
+    expect(toItemsQuery(DEFAULT_FILTERS).sort).toBe('-score')
+    expect(parseFilters('?sort=priority').sort).toBe('priority')
+    expect(serializeFilters({ ...DEFAULT_FILTERS, sort: 'priority' })).toBe('?sort=priority')
   })
 })
 

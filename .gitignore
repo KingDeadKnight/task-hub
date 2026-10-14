@@ -19,3 +19,6 @@ web/dist/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Docker compose secrets
+.env

@@ -1,0 +1,24 @@
+services:
+  taskhub:
+    build: .
+    image: taskhub:latest
+    container_name: taskhub
+    ports:
+      - "8080:8080"
+    # Values come from a .env file next to this one (see .env.example); compose reads it automatically.
+    # Without it everything stays empty and the sources are simply not configured.
+    environment:
+      TZ: ${TZ:-Europe/Brussels} # "today" and "overdue" follow this time zone
+      Sources__AzureDevOps__Organization: ${Sources__AzureDevOps__Organization:-}
+      Sources__AzureDevOps__Pat: ${Sources__AzureDevOps__Pat:-}
+      Sources__Jira__BaseUrl: ${Sources__Jira__BaseUrl:-}
+      Sources__Jira__Email: ${Sources__Jira__Email:-}
+      Sources__Jira__ApiToken: ${Sources__Jira__ApiToken:-}
+      Sync__IntervalMinutes: ${Sync__IntervalMinutes:-5}
+      Scoring__TodayCount: ${Scoring__TodayCount:-5}
+    volumes:
+      - taskhub-data:/data
+    restart: unless-stopped
+
+volumes:
+  taskhub-data:

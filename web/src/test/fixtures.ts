@@ -1,4 +1,4 @@
-import type { SourcesStatus, WorkItem, WorkItemFacets, WorkItemPage } from '../api/client'
+import type { SourcesStatus, Today, WorkItem, WorkItemFacets, WorkItemPage } from '../api/client'
 
 export function item(overrides: Partial<WorkItem> & Pick<WorkItem, 'id'>): WorkItem {
   const [source, externalId] = overrides.id.split(':')
@@ -14,15 +14,41 @@ export function item(overrides: Partial<WorkItem> & Pick<WorkItem, 'id'>): WorkI
     dueDate: null,
     updatedAt: '2026-10-01T09:00:00Z',
     lastSyncedAt: '2026-10-14T08:00:00Z',
+    score: 20,
+    scoreReasons: [],
     ...overrides,
   }
 }
 
 export const ITEMS: WorkItem[] = [
-  item({ id: 'azuredevops:1', title: 'Fix login bug', status: 'InProgress', rawStatus: 'Active', nativePriority: 1, dueDate: '2020-01-15' }),
-  item({ id: 'azuredevops:2', title: 'Write docs', project: 'Docs', dueDate: '2099-12-31' }),
-  item({ id: 'jira:A-1', title: 'Review contract', project: 'Mobile', status: 'Blocked', rawStatus: 'On hold', nativePriority: null }),
+  item({
+    id: 'azuredevops:1',
+    title: 'Fix login bug',
+    status: 'InProgress',
+    rawStatus: 'Active',
+    nativePriority: 1,
+    dueDate: '2020-01-15',
+    score: 95,
+    scoreReasons: [
+      { kind: 'Overdue', days: 12, priority: null },
+      { kind: 'HighPriority', days: null, priority: 1 },
+      { kind: 'InProgress', days: null, priority: null },
+    ],
+  }),
+  item({ id: 'azuredevops:2', title: 'Write docs', project: 'Docs', dueDate: '2099-12-31', score: 18 }),
+  item({
+    id: 'jira:A-1',
+    title: 'Review contract',
+    project: 'Mobile',
+    status: 'Blocked',
+    rawStatus: 'On hold',
+    nativePriority: null,
+    score: 45,
+    scoreReasons: [{ kind: 'Blocked', days: null, priority: null }],
+  }),
 ]
+
+export const TODAY: Today = { date: '2026-10-14', items: [ITEMS[0], ITEMS[2]] }
 
 export function page(items: WorkItem[] = ITEMS, totalCount = items.length): WorkItemPage {
   return { items, page: 1, pageSize: 200, totalCount, totalPages: 1 }

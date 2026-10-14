@@ -67,6 +67,18 @@ Jira utilise `POST /rest/api/3/search/jql` (pagination `nextPageToken` ; l'ancie
 - OpenAPI : `/openapi/v1.json` à l'exécution, et `web/openapi/taskhub.json` régénéré à chaque build de l'API (versionné : son diff montre les changements de contrat). Pendant cette génération, `Program.cs` ne migre pas la base et désactive la synchro.
 - JSON : enums en chaînes, nombres stricts (`JsonNumberHandling.Strict`).
 
+## Score de priorité
+
+- `PriorityScorer` (domaine, pur, testé) : score 0–100 = mélange pondéré (section `Scoring`) de l'échéance (en retard = 1, aujourd'hui = 0,9, puis décroissant jusqu'à `DueSoonDays`), de la priorité native normalisée par source (`PriorityScales` : Azure DevOps 1–4, Jira 1–5), du statut (En cours 1, Bloqué 0,8, À faire 0,3) et de l'ancienneté sans mise à jour (`StaleAfterDays`). Il renvoie aussi les raisons (`ScoreReasonKind`), formulées en français par le front.
+- Le score dépend de « maintenant » : calculé à la lecture, jamais stocké. `sort=-score` trie en mémoire (liste personnelle, petite). « Aujourd'hui » = fuseau local du serveur (`TZ` dans Docker).
+- `GET /api/items/today` : top `Scoring:TodayCount` des éléments ouverts (hors Terminé).
+
+## Docker
+
+- `docker compose up -d --build` puis http://localhost:8080. Image multi-stage : build du front (node), publish de l'API (SDK .NET 10, sans `global.json` ni génération OpenAPI), runtime aspnet non-root ; le front est servi depuis `wwwroot`, avec un fallback SPA qui exclut `/api` et `/openapi`.
+- Configuration via `.env` (voir `.env.example`, ignoré par git), passée variable par variable dans `docker-compose.yml` (compatible Compose < 2.24). Base SQLite dans le volume `taskhub-data` (`/data`).
+- Dans `Program.cs`, `UseStaticFiles` doit rester avant `UseRouting` (sinon le fallback SPA capte les assets) ; couvert par `StaticFrontEndTests`.
+
 ## Frontend (`/web`)
 
 - Client typé : `npm run gen:api` régénère `src/api/schema.d.ts` depuis `web/openapi/taskhub.json` (après tout changement de contrat de l'API). Appels via `src/api/client.ts` (openapi-fetch), hooks TanStack Query dans `src/api/queries.ts` (rafraîchissement toutes les 60 s).

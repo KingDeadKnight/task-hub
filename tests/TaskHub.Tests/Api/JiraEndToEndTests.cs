@@ -29,7 +29,7 @@ public sealed class JiraEndToEndTests
         {
             s.PostConfigure<JiraOptions>(o =>
             {
-                o.BaseUrl = new Uri("https://contoso.atlassian.net");
+                o.BaseUrl = "https://contoso.atlassian.net";
                 o.Email = "me@example.test";
                 o.ApiToken = "test-api-token";
             });
