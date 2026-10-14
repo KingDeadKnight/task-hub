@@ -1,0 +1,23 @@
+{
+  "issues": [
+    {
+      "expand": "",
+      "id": "10077",
+      "key": "MOB-30",
+      "self": "https://contoso.atlassian.net/rest/api/3/issue/10077",
+      "fields": {
+        "summary": "Traduire l'écran de paramètres",
+        "status": {
+          "name": "Backlog",
+          "id": "10000",
+          "statusCategory": { "id": 2, "key": "new", "name": "To Do", "colorName": "blue-gray" }
+        },
+        "project": { "id": "10001", "key": "MOB", "name": "Mobile App" },
+        "priority": { "id": "10100", "name": "Nice to have" },
+        "duedate": null,
+        "updated": "2026-09-30T16:45:00.000+0000"
+      }
+    }
+  ],
+  "isLast": true
+}

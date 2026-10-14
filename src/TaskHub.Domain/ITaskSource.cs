@@ -5,5 +5,11 @@ public interface ITaskSource
 {
     string Name { get; }
 
+    /// <summary>
+    /// False when the required settings are missing: the source is then left out of synchronization
+    /// and status reporting instead of failing on every run.
+    /// </summary>
+    bool IsConfigured => true;
+
     Task<IReadOnlyList<WorkItem>> FetchAssignedToMeAsync(CancellationToken ct);
 }

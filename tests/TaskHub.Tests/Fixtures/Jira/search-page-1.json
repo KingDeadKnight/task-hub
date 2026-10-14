@@ -1,0 +1,42 @@
+{
+  "issues": [
+    {
+      "expand": "",
+      "id": "10042",
+      "key": "MOB-12",
+      "self": "https://contoso.atlassian.net/rest/api/3/issue/10042",
+      "fields": {
+        "summary": "Crash au démarrage sur Android 15",
+        "status": {
+          "name": "In Review",
+          "id": "10003",
+          "statusCategory": { "id": 4, "key": "indeterminate", "name": "In Progress", "colorName": "yellow" }
+        },
+        "project": { "id": "10001", "key": "MOB", "name": "Mobile App" },
+        "priority": { "id": "2", "name": "High" },
+        "duedate": "2026-10-20",
+        "updated": "2026-10-14T10:15:30.123+0200"
+      }
+    },
+    {
+      "expand": "",
+      "id": "10050",
+      "key": "OPS-7",
+      "self": "https://contoso.atlassian.net/rest/api/3/issue/10050",
+      "fields": {
+        "summary": "Renouveler le certificat TLS",
+        "status": {
+          "name": "Blocked",
+          "id": "10010",
+          "statusCategory": { "id": 4, "key": "indeterminate", "name": "In Progress", "colorName": "yellow" }
+        },
+        "project": { "id": "10002", "key": "OPS", "name": "Operations" },
+        "priority": { "id": "1", "name": "Highest" },
+        "duedate": null,
+        "updated": "2026-10-10T08:00:00.000-0500"
+      }
+    }
+  ],
+  "nextPageToken": "page-2-token",
+  "isLast": false
+}

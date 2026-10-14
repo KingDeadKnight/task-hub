@@ -46,6 +46,18 @@ dotnet user-secrets --project src/TaskHub.Api set "Sources:AzureDevOps:Organizat
 dotnet user-secrets --project src/TaskHub.Api set "Sources:AzureDevOps:Pat" "<pat Work Items (Read)>"
 ```
 
+Jira Cloud (jeton : id.atlassian.com > Sécurité > Jetons d'API) :
+
+```bash
+dotnet user-secrets --project src/TaskHub.Api set "Sources:Jira:BaseUrl" "https://<site>.atlassian.net"
+dotnet user-secrets --project src/TaskHub.Api set "Sources:Jira:Email" "<email>"
+dotnet user-secrets --project src/TaskHub.Api set "Sources:Jira:ApiToken" "<jeton>"
+```
+
+Une source non configurée (`ITaskSource.IsConfigured == false`) est ignorée par la synchro et par `/api/sources`.
+
+Jira utilise `POST /rest/api/3/search/jql` (pagination `nextPageToken` ; l'ancien `/rest/api/3/search` est en cours de retrait). Statut : `StatusMappings` par nom, sinon catégorie Jira. Priorité : `PriorityMappings` par nom (Highest = 1 … Lowest = 5), sinon l'id. Les dates `updated` de Jira ont un décalage sans deux-points (`+0200`), voir `JiraMapper.ParseTimestamp`.
+
 `Sources:AzureDevOps:Projects` (vide = toute l'organisation) et `StatusMappings` (s'ajoutent aux valeurs par défaut de `AzureDevOpsOptions`) sont optionnels. En Development, `GET /api/debug/{source}` interroge une source en direct (503 si non configurée, 502 si erreur distante).
 
 ## API

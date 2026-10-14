@@ -29,7 +29,7 @@ internal static class SourcesEndpoints
         SyncRunner runner,
         CancellationToken ct)
     {
-        var summaries = await queries.GetSourceSummariesAsync(sources.Select(s => s.Name), ct);
+        var summaries = await queries.GetSourceSummariesAsync(sources.Where(s => s.IsConfigured).Select(s => s.Name), ct);
         return TypedResults.Ok(new SourcesStatusDto(runner.IsRunning, summaries.Select(SourceStatusDto.From).ToList()));
     }
 

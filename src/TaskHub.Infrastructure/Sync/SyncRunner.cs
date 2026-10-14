@@ -30,7 +30,7 @@ public sealed partial class SyncRunner(
         try
         {
             using var scope = scopeFactory.CreateScope();
-            var sources = scope.ServiceProvider.GetServices<ITaskSource>().ToList();
+            var sources = scope.ServiceProvider.GetServices<ITaskSource>().Where(s => s.IsConfigured).ToList();
             return await Task.WhenAll(sources.Select(s => SyncSourceAsync(s, ct)));
         }
         finally

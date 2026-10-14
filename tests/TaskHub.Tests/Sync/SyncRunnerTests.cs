@@ -150,6 +150,19 @@ public sealed class SyncRunnerTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Unconfigured_source_is_skipped_without_recording_a_run()
+    {
+        _alpha.Items = [FakeTaskSource.Item("alpha", "1")];
+        _beta.IsConfigured = false;
+        _beta.Error = new InvalidOperationException("must not be called");
+
+        var results = await SyncAsync();
+
+        results.Select(r => r.Source).Should().Equal("alpha");
+        (await RunsAsync()).Should().OnlyContain(r => r.Source == "alpha");
+    }
+
+    [Fact]
     public async Task Source_returning_items_of_another_source_fails_without_writing()
     {
         _alpha.Items = [FakeTaskSource.Item("beta", "1")];

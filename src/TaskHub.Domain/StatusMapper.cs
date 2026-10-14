@@ -13,6 +13,12 @@ public sealed class StatusMapper
         _fallback = fallback;
     }
 
-    public WorkItemStatus Map(string? rawStatus) =>
-        rawStatus is not null && _mappings.TryGetValue(rawStatus.Trim(), out var status) ? status : _fallback;
+    public WorkItemStatus Map(string? rawStatus) => TryMap(rawStatus, out var status) ? status : _fallback;
+
+    /// <summary>Looks the status up in the table only, so callers can apply their own fallback.</summary>
+    public bool TryMap(string? rawStatus, out WorkItemStatus status)
+    {
+        status = _fallback;
+        return rawStatus is not null && _mappings.TryGetValue(rawStatus.Trim(), out status);
+    }
 }

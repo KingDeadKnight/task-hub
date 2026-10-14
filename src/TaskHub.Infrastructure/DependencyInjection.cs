@@ -7,6 +7,7 @@ using TaskHub.Domain;
 using TaskHub.Infrastructure.Persistence;
 using TaskHub.Infrastructure.Queries;
 using TaskHub.Infrastructure.Sources.AzureDevOps;
+using TaskHub.Infrastructure.Sources.Jira;
 using TaskHub.Infrastructure.Sync;
 
 namespace TaskHub.Infrastructure;
@@ -37,6 +38,10 @@ public static class DependencyInjection
         services.AddOptions<AzureDevOpsOptions>().Bind(configuration.GetSection(AzureDevOpsOptions.SectionName));
         services.AddHttpClient<AzureDevOpsSource>(client => client.Timeout = TimeSpan.FromSeconds(30));
         services.AddTransient<ITaskSource>(sp => sp.GetRequiredService<AzureDevOpsSource>());
+
+        services.AddOptions<JiraOptions>().Bind(configuration.GetSection(JiraOptions.SectionName));
+        services.AddHttpClient<JiraSource>(client => client.Timeout = TimeSpan.FromSeconds(30));
+        services.AddTransient<ITaskSource>(sp => sp.GetRequiredService<JiraSource>());
 
         return services;
     }

@@ -26,6 +26,8 @@ internal sealed class FakeTaskSource(string name, params WorkItem[] items) : ITa
 {
     public string Name => name;
 
+    public bool IsConfigured { get; set; } = true;
+
     public IReadOnlyList<WorkItem> Items { get; set; } = items;
 
     public Exception? Error { get; set; }

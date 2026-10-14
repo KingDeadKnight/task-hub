@@ -25,6 +25,8 @@ public sealed partial class AzureDevOpsSource(
 
     public string Name => AzureDevOpsMapper.SourceName;
 
+    public bool IsConfigured => options.CurrentValue.IsConfigured;
+
     public async Task<IReadOnlyList<WorkItem>> FetchAssignedToMeAsync(CancellationToken ct)
     {
         var settings = options.CurrentValue;
