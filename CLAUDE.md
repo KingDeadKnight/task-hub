@@ -27,6 +27,17 @@ cd web && npm run dev                 # front sur :5173
 cd web && npm run build && npm test && npm run lint
 ```
 
+## Configuration des sources
+
+Section `Sources:<Nom>` de `appsettings.json` (valeurs non sensibles) ; secrets en User Secrets :
+
+```bash
+dotnet user-secrets --project src/TaskHub.Api set "Sources:AzureDevOps:Organization" "<org>"
+dotnet user-secrets --project src/TaskHub.Api set "Sources:AzureDevOps:Pat" "<pat Work Items (Read)>"
+```
+
+`Sources:AzureDevOps:Projects` (vide = toute l'organisation) et `StatusMappings` (s'ajoutent aux valeurs par défaut de `AzureDevOpsOptions`) sont optionnels. En Development, `GET /api/debug/{source}` interroge une source en direct (503 si non configurée, 502 si erreur distante).
+
 ## Conventions
 
 - Code (C# et TS) en anglais, UI en français.

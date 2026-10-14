@@ -1,0 +1,44 @@
+{
+  "count": 4,
+  "value": [
+    {
+      "id": 101,
+      "rev": 7,
+      "fields": {
+        "System.TeamProject": "Fabrikam Web",
+        "System.State": "Active",
+        "System.Title": "Fix login redirect loop",
+        "System.ChangedDate": "2026-10-13T15:42:10.123Z",
+        "Microsoft.VSTS.Common.Priority": 1,
+        "Microsoft.VSTS.Scheduling.DueDate": "2026-10-20T00:00:00Z"
+      },
+      "url": "https://dev.azure.com/contoso/_apis/wit/workItems/101"
+    },
+    {
+      "id": 102,
+      "rev": 3,
+      "fields": {
+        "System.TeamProject": "Backend",
+        "System.State": "Active",
+        "System.Title": "Migrate billing jobs",
+        "System.ChangedDate": "2026-10-01T09:00:00Z",
+        "Microsoft.VSTS.Common.Priority": 2,
+        "Microsoft.VSTS.CMMI.Blocked": "Yes",
+        "Microsoft.VSTS.Scheduling.TargetDate": "2026-11-01T00:00:00Z"
+      },
+      "url": "https://dev.azure.com/contoso/_apis/wit/workItems/102"
+    },
+    null,
+    {
+      "id": 103,
+      "rev": 1,
+      "fields": {
+        "System.TeamProject": "Backend",
+        "System.State": "Waiting For Review",
+        "System.Title": "Review API contract",
+        "System.ChangedDate": "2026-09-20T12:30:00Z"
+      },
+      "url": "https://dev.azure.com/contoso/_apis/wit/workItems/103"
+    }
+  ]
+}

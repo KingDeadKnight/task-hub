@@ -24,4 +24,8 @@
     <ProjectReference Include="..\..\src\TaskHub.Api\TaskHub.Api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Fixtures\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
