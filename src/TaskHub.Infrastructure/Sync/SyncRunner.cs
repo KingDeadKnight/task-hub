@@ -22,6 +22,8 @@ public sealed partial class SyncRunner(
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
 
+    public bool IsRunning => _gate.CurrentCount == 0;
+
     public async Task<IReadOnlyList<SyncResult>> RunAllAsync(CancellationToken ct)
     {
         await _gate.WaitAsync(ct);

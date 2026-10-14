@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TaskHub.Domain;
 using TaskHub.Infrastructure.Persistence;
+using TaskHub.Infrastructure.Queries;
 using TaskHub.Infrastructure.Sources.AzureDevOps;
 using TaskHub.Infrastructure.Sync;
 
@@ -30,6 +31,7 @@ public static class DependencyInjection
             .Validate(o => o.InactiveRetentionDays >= 0, "Sync:InactiveRetentionDays must not be negative.")
             .ValidateOnStart();
         services.AddSingleton<SyncRunner>();
+        services.AddSingleton<WorkItemQueryService>();
         services.AddHostedService<SyncService>();
 
         services.AddOptions<AzureDevOpsOptions>().Bind(configuration.GetSection(AzureDevOpsOptions.SectionName));

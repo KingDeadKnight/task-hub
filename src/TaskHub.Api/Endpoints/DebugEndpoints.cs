@@ -10,7 +10,7 @@ internal static class DebugEndpoints
     public static RouteGroupBuilder MapDebugEndpoints(this RouteGroupBuilder api)
     {
         // e.g. GET /api/debug/azuredevops
-        api.MapGet("/debug/{source}", FetchFromSourceAsync);
+        api.MapGet("/debug/{source}", FetchFromSourceAsync).ExcludeFromDescription();
         return api;
     }
 

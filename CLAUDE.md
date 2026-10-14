@@ -48,6 +48,13 @@ dotnet user-secrets --project src/TaskHub.Api set "Sources:AzureDevOps:Pat" "<pa
 
 `Sources:AzureDevOps:Projects` (vide = toute l'organisation) et `StatusMappings` (s'ajoutent aux valeurs par défaut de `AzureDevOpsOptions`) sont optionnels. En Development, `GET /api/debug/{source}` interroge une source en direct (503 si non configurée, 502 si erreur distante).
 
+## API
+
+- `GET /api/items` (filtres multi-valués `source`, `project`, `status`, plus `dueBefore` inclusif, `q`, `sort` avec `-` pour décroissant, `page`, `pageSize` ≤ 200), `GET /api/sources`, `POST /api/sync` (409 si déjà en cours). Seuls les éléments actifs sont listés.
+- Contrats publics dans `src/TaskHub.Api/Contracts` : ne jamais renvoyer d'entité ni de type de domaine directement.
+- OpenAPI : `/openapi/v1.json` à l'exécution, et `web/openapi/taskhub.json` régénéré à chaque build de l'API (versionné : son diff montre les changements de contrat). Pendant cette génération, `Program.cs` ne migre pas la base et désactive la synchro.
+- JSON : enums en chaînes, nombres stricts (`JsonNumberHandling.Strict`).
+
 ## Conventions
 
 - Code (C# et TS) en anglais, UI en français.
