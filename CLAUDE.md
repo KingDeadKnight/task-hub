@@ -99,3 +99,4 @@ Jira utilise `POST /rest/api/3/search/jql` (pagination `nextPageToken` ; l'ancie
 - Commits petits et conventionnels (`feat:`, `fix:`, `test:`, `chore:`…), une phase = une branche.
 - Avant de déclarer une phase terminée : `dotnet build`, `dotnet test`, `npm run build`, `npm test` verts.
 - Pour les connecteurs, vérifier la doc officielle actuelle des API (WIQL / Work Items, Jira Cloud REST) avant d'implémenter.
+- Chaque feature (phase) est décrite dans `docs/features/NN-nom.md` (objectif, fonctionnement, configuration, tests, vérification), ajouté sur sa branche et référencé dans `docs/README.md`.
