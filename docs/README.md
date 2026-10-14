@@ -16,6 +16,10 @@ TaskHub agrège, en lecture seule, les éléments de travail qui me sont assign�
 
 Chaque document présente l'objectif de la phase, ce qui a été implémenté, la configuration, les tests et la vérification réelle. Il décrit l'état du code **à la fin de la phase** : les phases suivantes ont pu faire évoluer certains points, signalés dans leur propre document.
 
+## Prochaines étapes
+
+[Améliorer le cycle de développement (SDLC)](sdlc/README.md) : la feuille de route à cocher (CI, protection de `main`, sécurité, tests de bout en bout, livraison, exploitation).
+
 ## Démarrage rapide
 
 ```bash
