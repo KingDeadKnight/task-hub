@@ -29,6 +29,14 @@ public sealed record WorkItemSort(WorkItemSortField Field, bool Descending)
     public static WorkItemSort Default { get; } = new(WorkItemSortField.UpdatedAt, Descending: true);
 }
 
+/// <summary>Distinct values of the active items, with counts, to populate filters.</summary>
+public sealed record WorkItemFacets(
+    IReadOnlyList<FacetValue<string>> Sources,
+    IReadOnlyList<FacetValue<string>> Projects,
+    IReadOnlyList<FacetValue<WorkItemStatus>> Statuses);
+
+public sealed record FacetValue<T>(T Value, int Count);
+
 public sealed record Page<T>(IReadOnlyList<T> Items, int PageNumber, int PageSize, int TotalCount);
 
 public sealed record SourceSummary(

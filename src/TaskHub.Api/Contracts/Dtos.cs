@@ -38,6 +38,25 @@ public sealed record WorkItemPageDto(IReadOnlyList<WorkItemDto> Items, int Page,
     }
 }
 
+public sealed record WorkItemFacetsDto(
+    IReadOnlyList<FacetValueDto> Sources,
+    IReadOnlyList<FacetValueDto> Projects,
+    IReadOnlyList<StatusFacetValueDto> Statuses)
+{
+    public static WorkItemFacetsDto From(WorkItemFacets facets)
+    {
+        ArgumentNullException.ThrowIfNull(facets);
+        return new(
+            facets.Sources.Select(f => new FacetValueDto(f.Value, f.Count)).ToList(),
+            facets.Projects.Select(f => new FacetValueDto(f.Value, f.Count)).ToList(),
+            facets.Statuses.Select(f => new StatusFacetValueDto(f.Value, f.Count)).ToList());
+    }
+}
+
+public sealed record FacetValueDto(string Value, int Count);
+
+public sealed record StatusFacetValueDto(WorkItemStatus Value, int Count);
+
 public sealed record SourcesStatusDto(bool IsSyncing, IReadOnlyList<SourceStatusDto> Sources);
 
 public sealed record SourceStatusDto(string Name, int ActiveItemCount, DateTimeOffset? LastSuccessAt, SyncRunDto? LastRun)

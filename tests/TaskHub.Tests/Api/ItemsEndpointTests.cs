@@ -81,6 +81,20 @@ public sealed class ItemsEndpointTests(SeededApi api) : IClassFixture<SeededApi>
         page.Should().BeEquivalentTo(new { Page = 2, PageSize = 3, TotalCount = 4, TotalPages = 2 });
     }
 
+    [Fact]
+    public async Task Facets_list_distinct_values_of_active_items_with_counts()
+    {
+        using var client = api.CreateClient();
+
+        var facets = await client.GetJsonAsync<WorkItemFacetsDto>("/api/items/facets");
+
+        facets.Should().BeEquivalentTo(new WorkItemFacetsDto(
+            [new("alpha", 3), new("beta", 1)],
+            [new("Docs", 1), new("Mobile", 1), new("Web", 2)],
+            [new(WorkItemStatus.Todo, 2), new(WorkItemStatus.InProgress, 1), new(WorkItemStatus.Blocked, 1)]),
+            o => o.WithStrictOrdering());
+    }
+
     [Theory]
     [InlineData("?status=Unknown", "status")]
     [InlineData("?sort=colour", "sort")]

@@ -127,6 +127,27 @@
         }
       }
     },
+    "/api/items/facets": {
+      "get": {
+        "tags": [
+          "TaskHub.Api"
+        ],
+        "summary": "Valeurs distinctes (sources, projets, statuts) des éléments actifs, avec leur nombre, pour les filtres.",
+        "operationId": "GetItemFacets",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkItemFacetsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/sources": {
       "get": {
         "tags": [
@@ -183,6 +204,22 @@
   },
   "components": {
     "schemas": {
+      "FacetValueDto": {
+        "required": [
+          "value",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "HealthResponse": {
         "required": [
           "status"
@@ -328,6 +365,22 @@
           }
         }
       },
+      "StatusFacetValueDto": {
+        "required": [
+          "value",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/WorkItemStatus"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "SyncResponseDto": {
         "required": [
           "results"
@@ -467,6 +520,34 @@
           "lastSyncedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "WorkItemFacetsDto": {
+        "required": [
+          "sources",
+          "projects",
+          "statuses"
+        ],
+        "type": "object",
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetValueDto"
+            }
+          },
+          "projects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetValueDto"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatusFacetValueDto"
+            }
           }
         }
       },

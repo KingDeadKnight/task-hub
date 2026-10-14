@@ -25,6 +25,21 @@ public sealed class WorkItemQueryService(IDbContextFactory<TaskHubDbContext> dbF
         return new Page<WorkItem>(entities.Select(e => e.ToDomain()).ToList(), pageNumber, pageSize, total);
     }
 
+    public async Task<WorkItemFacets> GetFacetsAsync(CancellationToken ct)
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        var active = db.WorkItems.AsNoTracking().Where(w => w.IsActive);
+
+        var sources = await active.GroupBy(w => w.Source).Select(g => new { g.Key, Count = g.Count() }).ToListAsync(ct);
+        var projects = await active.GroupBy(w => w.Project).Select(g => new { g.Key, Count = g.Count() }).ToListAsync(ct);
+        var statuses = await active.GroupBy(w => w.Status).Select(g => new { g.Key, Count = g.Count() }).ToListAsync(ct);
+
+        return new WorkItemFacets(
+            sources.OrderBy(s => s.Key, StringComparer.OrdinalIgnoreCase).Select(s => new FacetValue<string>(s.Key, s.Count)).ToList(),
+            projects.OrderBy(p => p.Key, StringComparer.OrdinalIgnoreCase).Select(p => new FacetValue<string>(p.Key, p.Count)).ToList(),
+            statuses.OrderBy(s => s.Key).Select(s => new FacetValue<WorkItemStatus>(s.Key, s.Count)).ToList());
+    }
+
     public async Task<IReadOnlyList<SourceSummary>> GetSourceSummariesAsync(IEnumerable<string> sourceNames, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(sourceNames);

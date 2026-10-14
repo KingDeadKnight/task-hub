@@ -55,6 +55,15 @@ dotnet user-secrets --project src/TaskHub.Api set "Sources:AzureDevOps:Pat" "<pa
 - OpenAPI : `/openapi/v1.json` à l'exécution, et `web/openapi/taskhub.json` régénéré à chaque build de l'API (versionné : son diff montre les changements de contrat). Pendant cette génération, `Program.cs` ne migre pas la base et désactive la synchro.
 - JSON : enums en chaînes, nombres stricts (`JsonNumberHandling.Strict`).
 
+## Frontend (`/web`)
+
+- Client typé : `npm run gen:api` régénère `src/api/schema.d.ts` depuis `web/openapi/taskhub.json` (après tout changement de contrat de l'API). Appels via `src/api/client.ts` (openapi-fetch), hooks TanStack Query dans `src/api/queries.ts` (rafraîchissement toutes les 60 s).
+- `openapi-typescript` déclare un peer `typescript ^5` : un `overrides` dans `package.json` le fait utiliser notre TypeScript 6.
+- Filtres, tri et groupage vivent dans l'URL (`src/state/filters.ts`, pur et testé ; `useFilters` pour l'historique). Le groupage est fait côté client, le tri côté serveur. La liste est chargée d'un bloc (200 max).
+- Thème clair/sombre/système (`taskhub.theme` en localStorage), appliqué avant le premier rendu par le script de `index.html`.
+- Tests : `mockApi` (stub de `fetch` par route) et `renderApp` dans `src/test`.
+- `.claude/launch.json` : configurations `api` et `web` pour lancer l'app.
+
 ## Conventions
 
 - Code (C# et TS) en anglais, UI en français.

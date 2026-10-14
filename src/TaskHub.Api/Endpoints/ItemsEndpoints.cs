@@ -20,6 +20,11 @@ internal static class ItemsEndpoints
                 "Filtres multi-valués (répéter le paramètre) : source, project, status. " +
                 "dueBefore est inclusif. q cherche dans le titre, l'identifiant externe et le projet. " +
                 "sort : updatedAt (défaut), dueDate, priority, status, title, project, source ; préfixer par '-' pour l'ordre décroissant (défaut : -updatedAt).");
+        api.MapGet("/items/facets", async (WorkItemQueryService queries, CancellationToken ct) =>
+                TypedResults.Ok(WorkItemFacetsDto.From(await queries.GetFacetsAsync(ct))))
+            .WithName("GetItemFacets")
+            .WithSummary("Valeurs distinctes (sources, projets, statuts) des éléments actifs, avec leur nombre, pour les filtres.");
+
         return api;
     }
 
