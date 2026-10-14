@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\TaskHub.Domain\TaskHub.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

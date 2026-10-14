@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <UserSecretsId>taskhub-api-6c1d2f0e</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TaskHub.Domain\TaskHub.Domain.csproj" />
+    <ProjectReference Include="..\TaskHub.Infrastructure\TaskHub.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
