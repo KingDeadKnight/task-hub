@@ -96,6 +96,7 @@ Jira utilise `POST /rest/api/3/search/jql` (pagination `nextPageToken` ; l'ancie
 - Chaque connecteur : une classe `ITaskSource`, un mapper pur testable, des fixtures JSON dans `tests/TaskHub.Tests/Fixtures`. `HttpClient` via `IHttpClientFactory`.
 - API : DTOs dédiés, jamais les entités EF exposées.
 - Ne jamais logguer de tokens ni de payloads complets contenant des données sensibles.
+- Le dépôt GitHub est (ou va devenir) **public** : tout ce qui est commité, y compris dans l'historique, est visible de tous. Ne jamais commiter de secret (PAT, jeton, mot de passe, `.env`, `taskhub.db`), ni de données réelles issues d'Azure DevOps ou de Jira (noms de clients, de projets internes, d'organisation, e-mails, URL de site) : les fixtures de `tests/TaskHub.Tests/Fixtures` doivent être anonymisées. Un secret poussé est à considérer comme compromis : le révoquer, la réécriture d'historique ne suffit pas.
 - Commits petits et conventionnels (`feat:`, `fix:`, `test:`, `chore:`…), une phase = une branche.
 - Avant de déclarer une phase terminée : `dotnet build`, `dotnet test`, `npm run build`, `npm test` verts.
 - Pour les connecteurs, vérifier la doc officielle actuelle des API (WIQL / Work Items, Jira Cloud REST) avant d'implémenter.
