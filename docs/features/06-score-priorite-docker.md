@@ -82,4 +82,4 @@ L'API sert le front :
 
 ## Non réalisé
 
-L'option « résumé quotidien par e-mail ou notification » du plan n'est pas implémentée.
+L'option « résumé quotidien par e-mail ou notification », envisagée au départ, n'est pas implémentée.

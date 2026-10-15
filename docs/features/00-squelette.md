@@ -51,7 +51,7 @@ public interface ITaskSource
 
 ### Projet
 
-- `CLAUDE.md` décrit les conventions : code en anglais et interface en français, aucun secret dans le dépôt, une phase par branche, commits conventionnels.
+- `AGENTS.md` décrit les conventions : code en anglais et interface en français, aucun secret dans le dépôt, une phase par branche, commits conventionnels.
 - `.gitignore` et `.gitattributes` (fins de ligne LF).
 
 ## Vérification

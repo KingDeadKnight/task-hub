@@ -1,6 +1,6 @@
 # TaskHub
 
-Agrégateur personnel (lecture seule) des éléments de travail qui me sont assignés dans Azure DevOps, Jira, etc. Le plan complet et les phases sont dans [plan.md](plan.md).
+Agrégateur personnel (lecture seule) des éléments de travail qui me sont assignés dans Azure DevOps, Jira, etc. Les phases sont décrites dans [docs/README.md](docs/README.md).
 
 ## Structure
 

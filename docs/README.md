@@ -1,6 +1,6 @@
 # Documentation TaskHub
 
-TaskHub agrège, en lecture seule, les éléments de travail qui me sont assignés dans plusieurs outils (Azure DevOps, Jira). Le plan d'origine est dans [plan.md](../plan.md) et les conventions de développement dans [AGENTS.md](../AGENTS.md).
+TaskHub agrège, en lecture seule, les éléments de travail qui me sont assignés dans plusieurs outils (Azure DevOps, Jira). Les conventions de développement sont dans [AGENTS.md](../AGENTS.md).
 
 ## Fonctionnalités, phase par phase
 
