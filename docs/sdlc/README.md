@@ -57,7 +57,6 @@ Workflow GitHub Actions déclenché sur chaque PR et chaque push sur `main`.
 ## 7. Expérience développeur
 
 - [ ] **Lancement en une commande** : `dotnet watch` pour l'API et Vite pour le front, ensemble.
-- [ ] **Signature moins pénible** : signature des commits par clé SSH, ou `default-cache-ttl` et `max-cache-ttl` plus longs dans `gpg-agent.conf`. On garde la signature, sans les interruptions.
 
 ## Hors SDLC, en attente
 
