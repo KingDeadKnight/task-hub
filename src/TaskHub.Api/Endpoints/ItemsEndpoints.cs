@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using TaskHub.Api.Contracts;
 using Microsoft.Extensions.Options;
+using TaskHub.Api.Contracts;
 using TaskHub.Domain;
 using TaskHub.Domain.Scoring;
 using TaskHub.Infrastructure.Queries;
