@@ -2,6 +2,32 @@
 
 Agrégateur personnel (lecture seule) des éléments de travail qui me sont assignés dans Azure DevOps, Jira, etc. Les phases sont décrites dans [docs/README.md](docs/README.md).
 
+## Objectif
+
+Mes tâches sont dispersées entre plusieurs outils (Azure DevOps, Jira…). TaskHub les rassemble dans une seule liste et répond à la question « sur quoi travailler maintenant ? ».
+
+- **Liste unifiée** : tous les éléments qui me sont assignés, toutes sources confondues, avec filtres (source, projet, statut, recherche), tri et groupage. Chaque élément renvoie vers sa page d'origine pour agir dessus.
+- **Vue « Aujourd'hui »** : les quelques éléments ouverts au score de priorité le plus élevé. Le score combine échéance, priorité native, statut et ancienneté, et il est expliqué par des raisons lisibles (« En retard de 4 j »).
+- **État des sources** : dernière synchronisation, nombre d'éléments, erreurs éventuelles, et synchronisation manuelle.
+
+## Principes et périmètre
+
+- **Lecture seule** : TaskHub n'écrit jamais dans les sources. On modifie une tâche dans son outil d'origine ; la synchro suivante reflète le changement.
+- **Personnel, mono-utilisateur** : pas de comptes ni d'authentification. L'app tourne en local ou dans un conteneur sur ma machine, avec mes propres jetons.
+- **Modèle commun** : chaque source est ramenée à un `WorkItem` (domaine) avec un statut normalisé `WorkItemStatus` (`Todo`, `InProgress`, `Blocked`, `Done`) ; le statut natif (`RawStatus`) et la priorité native (`NativePriority`) sont conservés. Identifiant : `{source}:{externalId}`.
+- **Base locale = cache** : SQLite n'est qu'une copie des sources, reconstructible par une synchro. Elle ne contient aucune donnée saisie dans TaskHub.
+- **Hors périmètre** (sauf demande explicite) : création ou édition de tâches, multi-utilisateur, notifications (le résumé quotidien par e-mail a été écarté).
+
+## Ajouter une source
+
+1. Lire la doc officielle actuelle de l'API de la source.
+2. Dans `TaskHub.Infrastructure` : options (`Sources:<Nom>`, secrets en User Secrets), une classe `ITaskSource` avec `IsConfigured`, un mapper pur vers `WorkItem` (statut et priorité via des mappings configurables), `HttpClient` via `IHttpClientFactory`.
+3. Si sa priorité la plus basse n'est pas 4, ajouter son échelle aux `PriorityScales` par défaut de `ScoringOptions` (domaine).
+4. Tests du mapper sur des fixtures JSON anonymisées dans `tests/TaskHub.Tests/Fixtures`.
+5. Documenter la configuration ici et dans `docs/features/NN-nom.md`.
+
+Les connecteurs Azure DevOps et Jira servent de modèles.
+
 ## Structure
 
 ```
