@@ -127,3 +127,15 @@ Jira utilise `POST /rest/api/3/search/jql` (pagination `nextPageToken` ; l'ancie
 - Avant de déclarer une phase terminée : `dotnet build`, `dotnet test`, `npm run build`, `npm test` verts.
 - Pour les connecteurs, vérifier la doc officielle actuelle des API (WIQL / Work Items, Jira Cloud REST) avant d'implémenter.
 - Chaque feature (phase) est décrite dans `docs/features/NN-nom.md` (objectif, fonctionnement, configuration, tests, vérification), ajouté sur sa branche et référencé dans `docs/README.md`.
+
+## Travail en agent
+
+Plusieurs agents peuvent travailler en parallèle, chacun sur sa tâche :
+
+- **Une tâche = une branche = une PR**, partie de `main` à jour. Ne jamais pousser sur `main`, ne jamais réécrire l'historique d'une branche déjà poussée (pas de force push).
+- **Rester dans son périmètre** : ne modifier que les fichiers nécessaires à la tâche. Un changement utile mais hors sujet se signale dans la description de la PR au lieu d'être fait.
+- **Feuille de route SDLC** (`docs/sdlc/README.md`) : ne pas cocher les cases ni remplir le journal des décisions. Ce fichier est mis à jour à la fusion, pour éviter les conflits entre PR.
+- **Avant d'ouvrir la PR** : `dotnet build`, `dotnet test`, et dans `web/` `npm run lint`, `npm run build`, `npm test`, tous verts. Si le contrat de l'API change, committer `web/openapi/taskhub.json` et `web/src/api/schema.d.ts` régénérés (`npm run gen:api`).
+- **Description de la PR** : ce qui change et pourquoi, comment c'est vérifié, et ce qui n'a pas pu l'être (par exemple un workflow GitHub Actions qui ne s'exécute qu'une fois poussé).
+- **Bloqué** (réglage GitHub, secret, décision produit) : s'arrêter et le dire plutôt que contourner. Les réglages de sécurité du dépôt (protection de branche, secret scanning) restent faits à la main par le propriétaire.
+- Les tâches d'outillage (CI, Dependabot, scripts…) n'ont pas de document `docs/features/` : leur PR suffit, et la doc existante est mise à jour si une commande ou un comportement change.
