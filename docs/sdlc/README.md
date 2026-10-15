@@ -26,8 +26,8 @@ Workflow GitHub Actions déclenché sur chaque PR et chaque push sur `main`.
 
 ## 2. Protéger `main` et passer par des PR
 
-- [ ] Règles de protection de `main` : CI verte obligatoire, commits signés exigés, pas de push direct ni de force push.
-- [ ] Une PR par feature au lieu de branches empilées : la revue, la CI et l'historique au même endroit.
+- [x] Règles de protection de `main` (ruleset) : CI verte obligatoire, pas de push direct ni de force push, PR réservées aux collaborateurs. Commits signés non exigés.
+- [x] Une PR par feature au lieu de branches empilées : la revue, la CI et l'historique au même endroit.
 - [ ] Modèle de PR (`.github/pull_request_template.md`) : description, tests ajoutés, doc `docs/features/NN-*.md` à jour, captures si l'interface change.
 
 ## 3. Dépendances et sécurité
@@ -70,3 +70,4 @@ Workflow GitHub Actions déclenché sur chaque PR et chaque push sur `main`.
 | Date | Décision |
 |---|---|
 | 15/10/2026 | CI GitHub Actions : un job par contrôle (`back`, `api-contract`, `ef-migrations`, `front`, `docker`), exigés par le ruleset de `main`. Couverture coverlet en artefact, sans seuil. Nommage C# : `s_camelCase` pour les champs statiques privés, PascalCase pour les constantes privées, `_camelCase` pour les autres champs privés. |
+| 15/10/2026 | Ruleset de `main` : checks de CI obligatoires, push direct et force push interdits, PR réservées aux collaborateurs. La signature des commits n'est pas exigée : elle n'est pas configurée sur tous les postes et n'apporte rien de plus pour un dépôt personnel. |
