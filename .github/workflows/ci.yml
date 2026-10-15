@@ -108,6 +108,9 @@ jobs:
 
       - run: dotnet tool restore
 
+      # dotnet ef reads the project metadata before building: the assets files must exist.
+      - run: dotnet restore
+
       - run: dotnet ef migrations has-pending-model-changes --project src/TaskHub.Infrastructure --startup-project src/TaskHub.Api
 
   front:
