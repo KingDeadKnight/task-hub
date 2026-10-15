@@ -14,15 +14,15 @@ Feuille de route pour fiabiliser et accélérer le développement de TaskHub. Le
 
 Workflow GitHub Actions déclenché sur chaque PR et chaque push sur `main`.
 
-- [ ] **Back** : `dotnet build` puis `dotnet test` (les analyseurs sont déjà en warnings-as-errors).
-- [ ] **Style C#** : `dotnet format --verify-no-changes`.
-- [ ] **Front** : `npm ci`, `npm run lint`, `npm run build`, `npm test` dans `web/`.
-- [ ] **Contrat API** : après le build de l'API, `git diff --exit-code web/openapi/taskhub.json`, puis `npm run gen:api` et `git diff --exit-code web/src/api/schema.d.ts`.
-- [ ] **Migrations EF** : `dotnet ef migrations has-pending-model-changes` doit être vide.
-- [ ] **Docker** : `docker build .` (sans push) pour valider l'image multi-stage.
-- [ ] **Couverture** : publier le rapport coverlet en artefact, pour suivre son évolution sans seuil arbitraire.
+- [x] **Back** : `dotnet build` puis `dotnet test` (les analyseurs sont déjà en warnings-as-errors).
+- [x] **Style C#** : `dotnet format --verify-no-changes`.
+- [x] **Front** : `npm ci`, `npm run lint`, `npm run build`, `npm test` dans `web/`.
+- [x] **Contrat API** : après le build de l'API, `git diff --exit-code web/openapi/taskhub.json`, puis `npm run gen:api` et `git diff --exit-code web/src/api/schema.d.ts`.
+- [x] **Migrations EF** : `dotnet ef migrations has-pending-model-changes` doit être vide.
+- [x] **Docker** : `docker build .` (sans push) pour valider l'image multi-stage.
+- [x] **Couverture** : publier le rapport coverlet en artefact, pour suivre son évolution sans seuil arbitraire.
 
-> Une session « Mettre en place la CI GitHub Actions » a été proposée pour ce chantier.
+> Fait : `.github/workflows/ci.yml`, jobs `back`, `api-contract`, `ef-migrations`, `front` et `docker`, checks obligatoires de `main`.
 
 ## 2. Protéger `main` et passer par des PR
 
@@ -69,4 +69,4 @@ Workflow GitHub Actions déclenché sur chaque PR et chaque push sur `main`.
 
 | Date | Décision |
 |---|---|
-| | |
+| 15/10/2026 | CI GitHub Actions : un job par contrôle (`back`, `api-contract`, `ef-migrations`, `front`, `docker`), exigés par le ruleset de `main`. Couverture coverlet en artefact, sans seuil. Nommage C# : `s_camelCase` pour les champs statiques privés, PascalCase pour les constantes privées, `_camelCase` pour les autres champs privés. |
