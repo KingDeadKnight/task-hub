@@ -44,14 +44,18 @@ Workflow GitHub Actions déclenché sur chaque PR et chaque push sur `main`.
 
 ## 5. Livraison
 
-- [ ] **Versions** : `release-please`, qui tire parti des commits conventionnels pour générer un changelog et une version SemVer à chaque release.
-- [ ] **Registre** : publier l'image sur GitHub Container Registry, étiquetée par version et par SHA, et faire pointer `docker-compose.yml` sur une image versionnée plutôt que sur `build: .`.
+- [x] **Versions** : `release-please`, qui tire parti des commits conventionnels pour générer un changelog et une version SemVer à chaque release.
+- [x] **Registre** : publier l'image sur GitHub Container Registry, étiquetée par version et par SHA, et faire pointer `docker-compose.yml` sur une image versionnée plutôt que sur `build: .`.
+> Fait : `.github/workflows/release.yml` (release-please, puis publication de l'image sur GHCR au merge de la PR de release), `docker-compose.build.yml` pour construire en local. Prérequis côté dépôt (réglages à faire à la main) : Settings > Actions > General > « Allow GitHub Actions to create and approve pull requests », et un secret `RELEASE_PLEASE_TOKEN` (PAT avec écriture sur contenu et PR) pour que la CI tourne sur la PR de release, faute de quoi les checks obligatoires de `main` la bloquent. Le premier paquet GHCR est privé : le rendre public ou s'authentifier pour le tirer.
+
 - [ ] **Déploiement** : si l'app doit tourner en permanence (NAS, VM), déploiement automatique de l'image étiquetée, ou Watchtower.
 
 ## 6. Exploitation
 
-- [ ] **Santé** : `/api/health` vérifie aussi la base et l'âge de la dernière synchro réussie, et sert de `healthcheck` dans `docker-compose.yml`.
-- [ ] **Logs** : journaux structurés en JSON en production. OpenTelemetry reste optionnel pour une app personnelle.
+- [x] **Santé** : `/api/health` vérifie aussi la base et l'âge de la dernière synchro réussie, et sert de `healthcheck` dans `docker-compose.yml`.
+- [x] **Logs** : journaux structurés en JSON en production. OpenTelemetry reste optionnel pour une app personnelle.
+> Fait : `GET /api/health` (base + âge de la synchro, 503 sinon), `healthcheck` du compose via `dotnet TaskHub.Api.dll --healthcheck`, logs JSON hors Development.
+
 - [ ] **Sauvegarde** : export périodique du volume `taskhub-data`. La synchro reconstruit les éléments, mais l'historique des `SyncRuns` serait perdu.
 
 ## 7. Expérience développeur
@@ -71,3 +75,4 @@ Workflow GitHub Actions déclenché sur chaque PR et chaque push sur `main`.
 | 15/10/2026 | CI GitHub Actions : un job par contrôle (`back`, `api-contract`, `ef-migrations`, `front`, `docker`), exigés par le ruleset de `main`. Couverture coverlet en artefact, sans seuil. Nommage C# : `s_camelCase` pour les champs statiques privés, PascalCase pour les constantes privées, `_camelCase` pour les autres champs privés. |
 | 15/10/2026 | Ruleset de `main` : checks de CI obligatoires, push direct et force push interdits, PR réservées aux collaborateurs. La signature des commits n'est pas exigée : elle n'est pas configurée sur tous les postes et n'apporte rien de plus pour un dépôt personnel. |
 | 16/10/2026 | Sécurité et E2E en workflows séparés de `ci.yml` (`codeql.yml`, `trivy.yml`, `e2e.yml`) pour ne pas alourdir la CI principale ; leurs checks (`analyze (csharp)`, `analyze (javascript-typescript)`, `trivy-image`, `e2e`) sont à ajouter au ruleset de `main`. Trivy ne bloque que les vulnérabilités HIGH/CRITICAL corrigeables. Playwright tourne contre l'image Docker, avec un faux serveur Azure DevOps (`web/e2e/mock-azure-devops.mjs`) pour des données déterministes sans réseau. Le secret scanning et le push protection restent un réglage manuel du dépôt. |
+| 16/10/2026 | Santé : `/api/health` répond 503 si la base échoue ou si aucune synchro n'a réussi depuis 3 intervalles (sans effet sans source configurée ou synchro désactivée) ; sonde de conteneur par `TaskHub.Api.dll --healthcheck` faute de curl dans l'image. Logs : JSON de la console hors Development, sans OpenTelemetry. Livraison : release-please (type `simple`, tag `X.Y.Z`) et publication GHCR dans le même workflow, car un release créé par `GITHUB_TOKEN` ne déclenche pas d'autre workflow. Le compose tire l'image versionnée ; la construction locale passe par `docker-compose.build.yml`. |

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using TaskHub.Domain;
 using TaskHub.Domain.Scoring;
+using TaskHub.Infrastructure.Health;
 using TaskHub.Infrastructure.Persistence;
 using TaskHub.Infrastructure.Queries;
 using TaskHub.Infrastructure.Sources.AzureDevOps;
@@ -35,6 +36,7 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddSingleton<SyncRunner>();
         services.AddSingleton<WorkItemQueryService>();
+        services.AddSingleton<HealthService>();
         services.AddOptions<ScoringOptions>()
             .Bind(configuration.GetSection(ScoringOptions.SectionName))
             .Validate(o => o.DueDateWeight >= 0 && o.PriorityWeight >= 0 && o.StatusWeight >= 0 && o.StalenessWeight >= 0,
