@@ -27,6 +27,7 @@ Chaque document présente l'objectif de la phase, ce qui a été implémenté, l
 dotnet run --project src/TaskHub.Api      # API : http://localhost:5180
 npm --prefix web run dev                  # front : http://localhost:5173
 
-# Conteneur
-docker compose up -d --build              # http://localhost:8080
+# Conteneur (image publiée sur GHCR) ; ajouter -f docker-compose.build.yml pour construire en local
+docker compose up -d                      # http://localhost:8080
+docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
 ```

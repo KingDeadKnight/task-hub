@@ -90,3 +90,5 @@ public sealed record SyncResponseDto(IReadOnlyList<SyncSourceResultDto> Results)
 }
 
 public sealed record SyncSourceResultDto(string Source, bool Succeeded, int ItemCount, string? Error);
+
+public sealed record HealthDto(string Status, bool Database, DateTimeOffset? LastSyncAt, bool SyncStale);

@@ -101,7 +101,9 @@ Jira utilise `POST /rest/api/3/search/jql` (pagination `nextPageToken` ; l'ancie
 
 ## Docker
 
-- `docker compose up -d --build` puis http://localhost:8080. Image multi-stage : build du front (node), publish de l'API (SDK .NET 10, sans `global.json` ni génération OpenAPI), runtime aspnet non-root ; le front est servi depuis `wwwroot`, avec un fallback SPA qui exclut `/api` et `/openapi`.
+- `docker compose up -d` (image versionnée `ghcr.io/kingdeadknight/task-hub`) ou, pour construire depuis les sources, `docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build`, puis http://localhost:8080. Image multi-stage : build du front (node), publish de l'API (SDK .NET 10, sans `global.json` ni génération OpenAPI), runtime aspnet non-root ; le front est servi depuis `wwwroot`, avec un fallback SPA qui exclut `/api` et `/openapi`.
+- Santé : `GET /api/health` vérifie la base et l'âge de la dernière synchro réussie (périmée après 3 × `Sync:IntervalMinutes`, ignoré sans source configurée) et répond 503 sinon. Le `healthcheck` du compose lance `dotnet TaskHub.Api.dll --healthcheck` (l'image n'a pas curl). Hors Development, les logs sont en JSON (une ligne par entrée) sur la sortie standard.
+- Livraison : release-please (`.github/workflows/release.yml`, `release-please-config.json`, `.release-please-manifest.json`) ouvre une PR de release d'après les commits conventionnels ; sa fusion crée le tag `X.Y.Z` et le job `publish` pousse l'image sur GHCR (`X.Y.Z`, `X.Y`, `sha-<sha>`). Le tag de l'image dans `docker-compose.yml` est mis à jour par release-please (marqueur `x-release-please-version`). Secret optionnel `RELEASE_PLEASE_TOKEN` (PAT) pour que la CI s'exécute sur la PR de release.
 - Configuration via `.env` (voir `.env.example`, ignoré par git), passée variable par variable dans `docker-compose.yml` (compatible Compose < 2.24). Base SQLite dans le volume `taskhub-data` (`/data`).
 - Dans `Program.cs`, `UseStaticFiles` doit rester avant `UseRouting` (sinon le fallback SPA capte les assets) ; couvert par `StaticFrontEndTests`.
 

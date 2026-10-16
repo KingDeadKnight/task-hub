@@ -8,8 +8,10 @@
     "/api/health": {
       "get": {
         "tags": [
-          "TaskHub.Api"
+          "HealthEndpoints"
         ],
+        "summary": "Santé : base de données joignable et dernière synchro réussie assez récente.",
+        "description": "Répond 503 (status « unhealthy ») si la base ne répond pas ou si la synchro n'a pas réussi depuis 3 intervalles.",
         "operationId": "GetHealth",
         "responses": {
           "200": {
@@ -17,7 +19,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HealthResponse"
+                  "$ref": "#/components/schemas/HealthDto"
                 }
               }
             }
@@ -262,14 +264,30 @@
           }
         }
       },
-      "HealthResponse": {
+      "HealthDto": {
         "required": [
-          "status"
+          "status",
+          "database",
+          "lastSyncAt",
+          "syncStale"
         ],
         "type": "object",
         "properties": {
           "status": {
             "type": "string"
+          },
+          "database": {
+            "type": "boolean"
+          },
+          "lastSyncAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "syncStale": {
+            "type": "boolean"
           }
         }
       },
@@ -708,10 +726,13 @@
   },
   "tags": [
     {
-      "name": "TaskHub.Api"
+      "name": "HealthEndpoints"
     },
     {
       "name": "ItemsEndpoints"
+    },
+    {
+      "name": "TaskHub.Api"
     },
     {
       "name": "SourcesEndpoints"
