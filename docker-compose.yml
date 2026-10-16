@@ -1,7 +1,8 @@
 services:
   taskhub:
-    build: .
-    image: taskhub:latest
+    # Versioned image published by the release workflow; release-please bumps the tag on each release.
+    # To build from the working tree instead, add docker-compose.build.yml (see the README).
+    image: ghcr.io/kingdeadknight/task-hub:0.0.0 # x-release-please-version
     container_name: taskhub
     ports:
       - "8080:8080"
@@ -19,6 +20,13 @@ services:
     volumes:
       - taskhub-data:/data
     restart: unless-stopped
+    # Fails (503) when the database does not answer or no sync succeeded for 3 intervals.
+    healthcheck:
+      test: ["CMD", "dotnet", "TaskHub.Api.dll", "--healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 volumes:
   taskhub-data:
