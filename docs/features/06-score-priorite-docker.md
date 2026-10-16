@@ -49,9 +49,17 @@ Les poids sont relatifs : le score est ramené sur 100. Les poids négatifs et u
 
 ```bash
 cp .env.example .env    # renseigner les sources (optionnel)
-docker compose up -d --build
+docker compose up -d
 # http://localhost:8080
 ```
+
+`docker-compose.yml` tire l'image versionnée publiée sur GitHub Container Registry (`ghcr.io/kingdeadknight/task-hub:<version>`, voir `.github/workflows/release.yml`). Pour construire l'image depuis les sources :
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+```
+
+Le conteneur a un `healthcheck` (`dotnet TaskHub.Api.dll --healthcheck`, qui appelle `GET /api/health`) : `docker ps` affiche `healthy` ou `unhealthy`.
 
 Le `Dockerfile` est multi-stage :
 1. **`node:24-alpine`** : `npm ci` puis `npm run build` du front.
