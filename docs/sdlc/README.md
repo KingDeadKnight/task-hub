@@ -28,18 +28,18 @@ Workflow GitHub Actions déclenché sur chaque PR et chaque push sur `main`.
 
 - [x] Règles de protection de `main` (ruleset) : CI verte obligatoire, pas de push direct ni de force push, PR réservées aux collaborateurs. Commits signés non exigés.
 - [x] Une PR par feature au lieu de branches empilées : la revue, la CI et l'historique au même endroit.
-- [ ] Modèle de PR (`.github/pull_request_template.md`) : description, tests ajoutés, doc `docs/features/NN-*.md` à jour, captures si l'interface change.
+- [x] Modèle de PR (`.github/pull_request_template.md`) : description, tests ajoutés, doc `docs/features/NN-*.md` à jour, captures si l'interface change.
 
 ## 3. Dépendances et sécurité
 
-- [ ] **Dependabot** (`.github/dependabot.yml`) : NuGet, npm (`/web`), images Docker et GitHub Actions, avec des mises à jour hebdomadaires groupées.
-- [ ] **CodeQL** pour C# et TypeScript.
+- [x] **Dependabot** (`.github/dependabot.yml`) : NuGet, npm (`/web`), images Docker et GitHub Actions, avec des mises à jour hebdomadaires groupées.
+- [x] **CodeQL** pour C# et TypeScript.
 - [ ] **Secrets** : activer le secret scanning et le push protection de GitHub (PAT Azure DevOps dans les User Secrets, `.env` local).
-- [ ] **Image Docker** : scan des vulnérabilités (Trivy) dans la CI.
+- [x] **Image Docker** : scan des vulnérabilités (Trivy) dans la CI.
 
 ## 4. Tests manquants
 
-- [ ] **Bout en bout Playwright** contre l'image Docker : chargement de la page, filtre, synchronisation. C'est la couche qui aurait attrapé la page blanche.
+- [x] **Bout en bout Playwright** contre l'image Docker : chargement de la page, filtre, synchronisation. C'est la couche qui aurait attrapé la page blanche.
 - [ ] **Tests de contrat des connecteurs** : un job manuel ou planifié qui appelle le vrai Azure DevOps (et Jira) avec des secrets GitHub, pour détecter une évolution des API externes (comme la dépréciation de `/rest/api/3/search`).
 
 ## 5. Livraison
@@ -74,4 +74,5 @@ Workflow GitHub Actions déclenché sur chaque PR et chaque push sur `main`.
 |---|---|
 | 15/10/2026 | CI GitHub Actions : un job par contrôle (`back`, `api-contract`, `ef-migrations`, `front`, `docker`), exigés par le ruleset de `main`. Couverture coverlet en artefact, sans seuil. Nommage C# : `s_camelCase` pour les champs statiques privés, PascalCase pour les constantes privées, `_camelCase` pour les autres champs privés. |
 | 15/10/2026 | Ruleset de `main` : checks de CI obligatoires, push direct et force push interdits, PR réservées aux collaborateurs. La signature des commits n'est pas exigée : elle n'est pas configurée sur tous les postes et n'apporte rien de plus pour un dépôt personnel. |
+| 16/10/2026 | Sécurité et E2E en workflows séparés de `ci.yml` (`codeql.yml`, `trivy.yml`, `e2e.yml`) pour ne pas alourdir la CI principale ; leurs checks (`analyze (csharp)`, `analyze (javascript-typescript)`, `trivy-image`, `e2e`) sont à ajouter au ruleset de `main`. Trivy ne bloque que les vulnérabilités HIGH/CRITICAL corrigeables. Playwright tourne contre l'image Docker, avec un faux serveur Azure DevOps (`web/e2e/mock-azure-devops.mjs`) pour des données déterministes sans réseau. Le secret scanning et le push protection restent un réglage manuel du dépôt. |
 | 16/10/2026 | Santé : `/api/health` répond 503 si la base échoue ou si aucune synchro n'a réussi depuis 3 intervalles (sans effet sans source configurée ou synchro désactivée) ; sonde de conteneur par `TaskHub.Api.dll --healthcheck` faute de curl dans l'image. Logs : JSON de la console hors Development, sans OpenTelemetry. Livraison : release-please (type `simple`, tag `X.Y.Z`) et publication GHCR dans le même workflow, car un release créé par `GITHUB_TOKEN` ne déclenche pas d'autre workflow. Le compose tire l'image versionnée ; la construction locale passe par `docker-compose.build.yml`. |
