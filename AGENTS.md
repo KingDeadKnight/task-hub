@@ -51,6 +51,7 @@ dotnet test
 dotnet run --project src/TaskHub.Api  # API sur :5180
 cd web && npm run dev                 # front sur :5173
 cd web && npm run build && npm test && npm run lint
+cd web && npm run e2e:image && npm run e2e   # E2E Playwright contre l'image Docker (une fois: npm run e2e:install)
 dotnet tool restore                   # dotnet-ef (manifeste local)
 dotnet ef migrations add <Nom> --project src/TaskHub.Infrastructure --startup-project src/TaskHub.Api --output-dir Persistence/Migrations
 ```
