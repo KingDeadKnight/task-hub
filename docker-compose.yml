@@ -2,7 +2,7 @@ services:
   taskhub:
     # Versioned image published by the release workflow; release-please bumps the tag on each release.
     # To build from the working tree instead, add docker-compose.build.yml (see the README).
-    image: ghcr.io/kingdeadknight/task-hub:0.0.0 # x-release-please-version
+    image: ghcr.io/kingdeadknight/task-hub:1.0.0 # x-release-please-version
     container_name: taskhub
     ports:
       - "8080:8080"
