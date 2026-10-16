@@ -1,7 +1,14 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
+using TaskHub.Api;
 using TaskHub.Api.Endpoints;
 using TaskHub.Infrastructure;
+
+// "dotnet TaskHub.Api.dll --healthcheck": probe used by the container healthcheck (the runtime image has no curl).
+if (args.Contains("--healthcheck", StringComparer.Ordinal))
+{
+    return await HealthProbe.RunAsync();
+}
 
 const string CorsPolicy = "web";
 
@@ -13,6 +20,18 @@ var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDoc
 if (isOpenApiGeneration)
 {
     builder.Configuration["Sync:Enabled"] = "false";
+}
+
+// One JSON object per line in production (collected as-is by `docker logs`); readable console output in development.
+if (!builder.Environment.IsDevelopment() && !isOpenApiGeneration)
+{
+    builder.Logging.ClearProviders();
+    builder.Logging.AddJsonConsole(options =>
+    {
+        options.UseUtcTimestamp = true;
+        options.TimestampFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
+        options.IncludeScopes = true;
+    });
 }
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
@@ -50,8 +69,7 @@ app.UseCors(CorsPolicy);
 app.MapOpenApi();
 
 var api = app.MapGroup("/api");
-api.MapGet("/health", () => TypedResults.Ok(new HealthResponse("ok")))
-    .WithName("GetHealth");
+api.MapHealthEndpoints();
 api.MapItemsEndpoints();
 api.MapSourcesEndpoints();
 
@@ -64,5 +82,4 @@ if (app.Environment.IsDevelopment())
 app.MapFallbackToFile("{*path:regex(^(?!api/|openapi/).*$)}", "index.html");
 
 await app.RunAsync();
-
-internal sealed record HealthResponse(string Status);
+return 0;

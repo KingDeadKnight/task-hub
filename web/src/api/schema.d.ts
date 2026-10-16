@@ -11,6 +11,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Santé : base de données joignable et dernière synchro réussie assez récente.
+         * @description Répond 503 (status « unhealthy ») si la base ne répond pas ou si la synchro n'a pas réussi depuis 3 intervalles.
+         */
         get: operations["GetHealth"];
         put?: never;
         post?: never;
@@ -123,8 +127,12 @@ export interface components {
             /** Format: int32 */
             count: number;
         };
-        HealthResponse: {
+        HealthDto: {
             status: string;
+            database: boolean;
+            /** Format: date-time */
+            lastSyncAt: null | string;
+            syncStale: boolean;
         };
         HttpValidationProblemDetails: {
             type?: null | string;
@@ -259,7 +267,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HealthResponse"];
+                    "application/json": components["schemas"]["HealthDto"];
                 };
             };
         };
