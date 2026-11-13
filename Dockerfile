@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # --- Front end: React + Vite ---------------------------------------------------
-FROM node:24-alpine AS web
+FROM node:25-alpine AS web
 WORKDIR /web
 COPY web/package.json web/package-lock.json ./
 RUN npm ci
@@ -9,7 +9,7 @@ COPY web/ ./
 RUN npm run build
 
 # --- API: .NET publish -----------------------------------------------------------
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS api
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS api
 WORKDIR /src
 # global.json pins the exact local SDK; the image's SDK 10 is used instead.
 COPY Directory.Build.props .editorconfig ./
@@ -22,7 +22,7 @@ COPY src/ src/
 RUN dotnet publish src/TaskHub.Api/TaskHub.Api.csproj -c Release -o /app --no-restore -p:OpenApiGenerateDocuments=false
 
 # --- Runtime -----------------------------------------------------------------------
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS runtime
 WORKDIR /app
 COPY --from=api /app ./
 COPY --from=web /web/dist ./wwwroot
